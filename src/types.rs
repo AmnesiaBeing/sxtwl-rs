@@ -1,7 +1,8 @@
 //! 定义日历计算的核心枚举与数据结构
 
-// 天干（10个）
+/// 天干（10个）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum TianGan {
     Jia,  // 甲
     Yi,   // 乙
@@ -15,8 +16,9 @@ pub enum TianGan {
     Gui,  // 癸
 }
 
-// 地支（12个）
+/// 地支（12个）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum DiZhi {
     Zi,   // 子
     Chou, // 丑
@@ -32,37 +34,47 @@ pub enum DiZhi {
     Hai,  // 亥
 }
 
-// 节气（24个，与原库Jqmc顺序一致）
+/// 节气（24个）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum JieQi {
-    DongZhi,     // 冬至
-    XiaoHan,     // 小寒
-    DaHan,       // 大寒
-    LiChun,      // 立春
-    YuShui,      // 雨水
-    JingZhe,     // 惊蛰
-    ChunFen,     // 春分
-    QingMing,    // 清明
-    GuYu,        // 谷雨
-    LiXia,       // 立夏
-    XiaoMan,     // 小满
-    MangZhong,   // 芒种
-    XiaZhi,      // 夏至
-    XiaoShu,     // 小暑
-    DaShu,       // 大暑
-    LiQiu,       // 立秋
-    ChuShu,      // 处暑
-    BaiLu,       // 白露
-    QiuFen,      // 秋分
-    HanLu,       // 寒露
-    ShuangJiang, // 霜降
-    LiDong,      // 立冬
-    XiaoXue,     // 小雪
-    DaXue,       // 大雪
+    LiChun = 0,       // 立春
+    YuShui = 1,       // 雨水
+    JingZhe = 2,      // 惊蛰
+    ChunFen = 3,      // 春分
+    QingMing = 4,     // 清明
+    GuYu = 5,         // 谷雨
+    LiXia = 6,        // 立夏
+    XiaoMan = 7,      // 小满
+    MangZhong = 8,    // 芒种
+    XiaZhi = 9,       // 夏至
+    XiaoShu = 10,     // 小暑
+    DaShu = 11,       // 大暑
+    LiQiu = 12,       // 立秋
+    ChuShu = 13,      // 处暑
+    BaiLu = 14,       // 白露
+    QiuFen = 15,      // 秋分
+    HanLu = 16,       // 寒露
+    ShuangJiang = 17, // 霜降
+    LiDong = 18,      // 立冬
+    XiaoXue = 19,     // 小雪
+    DaXue = 20,       // 大雪
+    DongZhi = 21,     // 冬至
+    XiaoHan = 22,     // 小寒
+    DaHan = 23,       // 大寒
 }
 
-// 生肖（12个，与地支一一对应）
+/// 节气信息结构体
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[allow(missing_docs)]
+pub struct JieQiInfo {
+    pub jd: JulianDay,   // 节气对应的儒略日
+    pub jq_index: JieQi, // 节气索引
+}
+
+/// 生肖（12个，与地支一一对应）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum ShengXiao {
     Shu,  // 鼠（子）
     Niu,  // 牛（丑）
@@ -78,25 +90,9 @@ pub enum ShengXiao {
     Zhu,  // 猪（亥）
 }
 
-// 星座（12个，与原库XiZ顺序一致）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum XingZuo {
-    MoJie,     // 摩羯
-    ShuiPing,  // 水瓶
-    ShuangYu,  // 双鱼
-    BaiYang,   // 白羊
-    JinNiu,    // 金牛
-    ShuangZi,  // 双子
-    JuXie,     // 巨蟹
-    ShiZi,     // 狮子
-    ChuNv,     // 处女
-    TianCheng, // 天秤
-    TianXie,   // 天蝎
-    SheShou,   // 射手
-}
-
 /// 公历日期（年、月、日、时、分、秒）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[allow(missing_docs)]
 pub struct SolarDate {
     pub year: i32,   // 年份（支持BC，如公元前722年为-721）
     pub month: u8,   // 1-12
@@ -108,6 +104,7 @@ pub struct SolarDate {
 
 /// 农历日期（年、月、日、是否闰月）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub struct LunarDate {
     pub year: i32,     // 农历年
     pub month: u8,     // 1-12
@@ -116,20 +113,13 @@ pub struct LunarDate {
 }
 
 /// 儒略日（天文计算基础，高精度浮点数）
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct JulianDay(pub f64);
 
 /// 干支组合（天干+地支）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub struct GanZhi {
     pub tg: TianGan,
     pub dz: DiZhi,
-}
-
-/// 时间片段（用于节气精确时间等）
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Time {
-    pub hour: u8,
-    pub minute: u8,
-    pub second: f64,
 }
