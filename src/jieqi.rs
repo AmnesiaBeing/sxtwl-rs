@@ -1,11 +1,14 @@
 //! 节气计算模块
 //! 提供节气查询与精确时间计算
 
-use crate::{JieQiInfo, JulianDay, SolarDate, consts::J2000, types::JieQi};
+use crate::{JieQiInfo, JulianDay, SolarDate, types::JieQi};
 
 use alloc::vec::Vec;
 
 use libm::{floor, pow, sin};
+
+/// 2000年1月1日12:00的儒略日
+pub const J2000: f64 = 2451545.0;
 
 impl JieQi {
     /// 获取节气名称

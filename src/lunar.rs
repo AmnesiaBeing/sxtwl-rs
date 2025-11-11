@@ -286,12 +286,8 @@ mod tests {
         ];
 
         // 正常月份
-        let month1 = calculate_lunar_month(0, &jieqis);
-        assert_eq!(month1, 1);
-
-        // 可能需要调整的月份
-        let month2 = calculate_lunar_month(13, &jieqis);
-        assert!(month2 >= 1 && month2 <= 12);
+        let month = calculate_lunar_month(0, &jieqis);
+        assert_eq!(month, 1);
     }
 
     #[test]

@@ -7,16 +7,11 @@
 extern crate alloc;
 extern crate libm;
 
-// 内部模块导出
-pub mod consts;
-// pub mod error;
-// pub mod ganzhi;
+pub use types::*;
+
+pub mod ganzhi;
 pub mod jieqi;
 pub mod julian;
 pub mod lunar;
 pub mod types;
-// pub mod utils;
 
-// 重导出核心类型与错误，简化外部使用
-// pub use error::CalendarError;
-pub use types::*;

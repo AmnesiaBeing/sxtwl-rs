@@ -119,7 +119,4 @@ pub struct JulianDay(pub f64);
 /// 干支组合（天干+地支）
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
-pub struct GanZhi {
-    pub tg: TianGan,
-    pub dz: DiZhi,
-}
+pub struct GanZhi(pub TianGan, pub DiZhi);

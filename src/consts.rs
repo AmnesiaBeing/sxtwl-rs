@@ -46,9 +46,6 @@ pub const WEEK_CN: &[&str] = &[
 /// 圆周率
 pub const PI: f64 = 3.1415926535897931160e+00;
 
-/// 2000年1月1日12:00的儒略日
-pub const J2000: f64 = 2451545.0;
-
 /// 地球赤道半径（千米）
 pub const EARTH_EQUATORIAL_RADIUS: f64 = 6378.1366;
 
