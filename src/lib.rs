@@ -13,5 +13,7 @@ pub mod ganzhi;
 pub mod jieqi;
 pub mod julian;
 pub mod lunar;
+pub mod solordate;
+pub mod shengxiao;
 pub mod types;
 

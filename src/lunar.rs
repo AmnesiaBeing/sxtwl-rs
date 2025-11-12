@@ -33,7 +33,7 @@ impl From<SolarDate> for LunarDate {
         all_jieqis.extend(&jieqis_next);
 
         // 找到当前日期所在的农历月份区间
-        let (month_idx, is_leap) = find_lunar_month_info(jd, &all_jieqis);
+        let (month_idx, is_leap_month) = find_lunar_month_info(jd, &all_jieqis);
 
         // 计算农历年（以立春为界）
         let lunar_year = calculate_lunar_year(jd, year, &jieqis_curr);
@@ -48,7 +48,7 @@ impl From<SolarDate> for LunarDate {
             year: lunar_year,
             month: lunar_month,
             day: lunar_day,
-            is_leap,
+            is_leap_month,
         }
     }
 }
@@ -74,6 +74,114 @@ impl From<LunarDate> for SolarDate {
         // 如果在前三年内没有找到，使用默认的近似计算
         // 这种情况应该很少见，只在极端情况下发生
         approximate_lunar_to_solar(lunar)
+    }
+}
+
+impl LunarDate {
+    /// 中文数字（0-10，用于日期转换）
+    const NUM_CN: &[&str] = &[
+        "零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十",
+    ];
+
+    /// 农历月份名称（1-12月）
+    const LUNAR_MONTH_NAMES: &[&str] = &[
+        "正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月",
+        "腊月",
+    ];
+
+    /// 农历日期名称（1-30日）
+    const LUNAR_DAY_NAMES: &[&str] = &[
+        "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十", "十一",
+        "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十", "廿一", "廿二",
+        "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十",
+    ];
+
+    /// 将农历年转换成中文表示
+    ///
+    /// # 返回值
+    /// 农历年的中文表示（如"二零二四年"）
+    pub fn year_to_chinese(&self) -> alloc::string::String {
+        let mut result = alloc::string::String::new();
+        
+        // 处理年份符号（公元前）
+        if self.year < 0 {
+            result.push_str("前");
+        }
+        
+        // 转换为绝对值
+        let abs_year = self.year.abs();
+        
+        // 处理每一位数字
+        let mut digits = [0; 4]; // 假设年份最多4位数
+        let mut temp_year = abs_year;
+        let mut digit_count = 0;
+        
+        // 分解年份为各个数字（从低位到高位）
+        if temp_year == 0 {
+            result.push_str("零");
+            return result;
+        }
+        
+        while temp_year > 0 {
+            digits[digit_count] = (temp_year % 10) as usize;
+            digit_count += 1;
+            temp_year /= 10;
+        }
+        
+        // 从高位到低位转换为中文数字
+        for i in (0..digit_count).rev() {
+            if let Some(digit_char) = Self::NUM_CN.get(digits[i]) {
+                result.push_str(digit_char);
+            }
+        }
+        
+        result.push_str("年");
+        result
+    }
+
+    /// 将农历月转换成中文表示
+    ///
+    /// # 返回值
+    /// 农历月的中文表示（如"正月"或"闰五月"）
+    pub fn month_to_chinese(&self) -> alloc::string::String {
+        let mut result = alloc::string::String::new();
+        
+        // 检查月份是否在有效范围内
+        if self.month < 1 || self.month > 12 {
+            return result;
+        }
+        
+        // 处理闰月
+        if self.is_leap_month {
+            result.push_str("闰");
+        }
+        
+        // 获取月份名称
+        if let Some(month_name) = Self::LUNAR_MONTH_NAMES.get((self.month - 1) as usize) {
+            result.push_str(month_name);
+        }
+        
+        result
+    }
+
+    /// 将农历日转换成中文表示
+    ///
+    /// # 返回值
+    /// 农历日的中文表示（如"初一"）
+    pub fn day_to_chinese(&self) -> alloc::string::String {
+        let mut result = alloc::string::String::new();
+        
+        // 检查日期是否在有效范围内
+        if self.day < 1 || self.day > 30 {
+            return result;
+        }
+        
+        // 获取日期名称
+        if let Some(day_name) = Self::LUNAR_DAY_NAMES.get((self.day - 1) as usize) {
+            result.push_str(day_name);
+        }
+        
+        result
     }
 }
 
@@ -173,7 +281,7 @@ fn find_solar_date_from_lunar(
 
             // 检查闰月条件是否匹配
             let is_leap_month = (end_jieqi.jd - start_jieqi.jd).0 > 30.0;
-            if lunar.is_leap != is_leap_month {
+            if lunar.is_leap_month != is_leap_month {
                 continue;
             }
 
@@ -235,7 +343,7 @@ mod tests {
             year: 2023,
             month: 5,
             day: 15,
-            is_leap: false,
+            is_leap_month: false,
         };
 
         let solar: SolarDate = lunar.into();
@@ -319,7 +427,7 @@ mod tests {
             year: 2023,
             month: 12,
             day: 30,
-            is_leap: false,
+            is_leap_month: false,
         };
 
         let solar: SolarDate = lunar_edge.into();
@@ -333,7 +441,7 @@ mod tests {
             year: 2023,
             month: 6,
             day: 15,
-            is_leap: false,
+            is_leap_month: false,
         };
 
         let solar = approximate_lunar_to_solar(lunar);

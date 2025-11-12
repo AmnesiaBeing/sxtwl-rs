@@ -156,11 +156,11 @@ impl GanZhi {
     /// 从年份获取干支
     ///
     /// # 参数
-    /// - `year`: 年份（支持BC，如公元前722年为-721）
+    /// - `year`: 农历年份（支持BC，如公元前722年为-721）
     ///
     /// # 返回值
     /// 干支结构体
-    pub fn from_year(year: i32) -> Self {
+    pub fn from_lunar_year(year: i32) -> Self {
         // 1984年是甲子年，作为参考点
         const REFERENCE_YEAR: i32 = 1984;
         let diff = year - REFERENCE_YEAR;
@@ -309,29 +309,29 @@ mod tests {
     #[test]
     fn test_ganzhi_from_year() {
         // 测试参考年1984（甲子年）
-        let gz1 = GanZhi::from_year(1984);
+        let gz1 = GanZhi::from_lunar_year(1984);
         assert!(matches!(gz1.0, TianGan::Jia));
         assert!(matches!(gz1.1, DiZhi::Zi));
         assert_eq!(gz1.as_str(), "甲子");
 
         // 测试2023年（癸卯年）
-        let gz2 = GanZhi::from_year(2023);
+        let gz2 = GanZhi::from_lunar_year(2023);
         assert!(matches!(gz2.0, TianGan::Gui));
         assert!(matches!(gz2.1, DiZhi::Mao));
         assert_eq!(gz2.as_str(), "癸卯");
 
         // 测试2000年（庚辰年）
-        let gz3 = GanZhi::from_year(2000);
+        let gz3 = GanZhi::from_lunar_year(2000);
         assert!(matches!(gz3.0, TianGan::Geng));
         assert!(matches!(gz3.1, DiZhi::Chen));
         assert_eq!(gz3.as_str(), "庚辰");
 
         // 测试公元前722年
-        let gz4 = GanZhi::from_year(-721); // 公元前722年
+        let gz4 = GanZhi::from_lunar_year(-721); // 公元前722年
         assert_eq!(gz4.as_str(), "己未");
 
         // 测试未来年份
-        let gz5 = GanZhi::from_year(2050);
+        let gz5 = GanZhi::from_lunar_year(2050);
         assert_eq!(gz5.as_str(), "庚午");
     }
 
@@ -354,7 +354,7 @@ mod tests {
         assert_eq!(overflow_gz.to_index(), 40); // 100 % 60 = 40
 
         // 测试负年份
-        let ancient_gz = GanZhi::from_year(-1000);
+        let ancient_gz = GanZhi::from_lunar_year(-1000);
         // 只是确保不会panic，不检查具体值
         assert!(!ancient_gz.as_str().is_empty());
     }

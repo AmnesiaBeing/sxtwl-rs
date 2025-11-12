@@ -106,10 +106,10 @@ pub struct SolarDate {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct LunarDate {
-    pub year: i32,     // 农历年
-    pub month: u8,     // 1-12
-    pub day: u8,       // 1-30（农历月最多30天）
-    pub is_leap: bool, // 是否为闰月
+    pub year: i32,           // 农历年
+    pub month: u8,           // 1-12
+    pub day: u8,             // 1-30（农历月最多30天）
+    pub is_leap_month: bool, // 是否为闰月
 }
 
 /// 儒略日（天文计算基础，高精度浮点数）
