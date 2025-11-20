@@ -1,7 +1,7 @@
 //! 定义日历计算的核心枚举与数据结构
 
 /// 天干（10个）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum TianGan {
     Jia,  // 甲
@@ -17,7 +17,7 @@ pub enum TianGan {
 }
 
 /// 地支（12个）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum DiZhi {
     Zi,   // 子
@@ -35,7 +35,7 @@ pub enum DiZhi {
 }
 
 /// 节气（24个）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum JieQi {
     LiChun = 0,       // 立春
@@ -65,7 +65,7 @@ pub enum JieQi {
 }
 
 /// 节气信息结构体
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 pub struct JieQiInfo {
     pub jd: JulianDay,   // 节气对应的儒略日
@@ -73,7 +73,7 @@ pub struct JieQiInfo {
 }
 
 /// 生肖（12个，与地支一一对应）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum ShengXiao {
     Shu,  // 鼠（子）
@@ -91,7 +91,7 @@ pub enum ShengXiao {
 }
 
 /// 公历日期（年、月、日、时、分、秒）
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(missing_docs)]
 pub struct SolarDate {
     pub year: i32,   // 年份（支持BC，如公元前722年为-721）
@@ -103,7 +103,7 @@ pub struct SolarDate {
 }
 
 /// 农历日期（年、月、日、是否闰月）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct LunarDate {
     pub year: i32,           // 农历年
@@ -113,10 +113,10 @@ pub struct LunarDate {
 }
 
 /// 儒略日（天文计算基础，高精度浮点数）
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, PartialEq, PartialOrd)]
 pub struct JulianDay(pub f64);
 
 /// 干支组合（天干+地支）
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct GanZhi(pub TianGan, pub DiZhi);
