@@ -27,56 +27,56 @@ use core::f64::consts::PI;
 // pub const PI2: f64 = PI * 2.0; //TAU
 // pub const PI_2: f64 = PI / 2.0;//FRAC_PI_2
 
-// 地球赤道半径(千米)
+/// 地球赤道半径(千米)
 pub const CS_R_EAR: f64 = 6378.1366;
 
-// 平均半径
+/// 平均半径
 pub const CS_R_EAR_A: f64 = 0.99834 * CS_R_EAR;
 
-// 地球极赤半径比
+/// 地球极赤半径比
 pub const CS_BA: f64 = 0.99664719;
 
-// 地球极赤半径比的平方
+/// 地球极赤半径比的平方
 pub const CS_BA2: f64 = CS_BA * CS_BA;
 
-// 天文单位长度(千米)
+/// 天文单位长度(千米)
 pub const CS_AU: f64 = 1.49597870691e8;
 
-// sin(太阳视差)
+/// sin(太阳视差)
 pub const CS_SINP: f64 = CS_R_EAR / CS_AU;
 
-// 太阳视差
+/// 太阳视差
 // pub const CS_PI: f64 = CS_SINP.asin(); // 太阳视差 Rust暂不支持常量计算asin
 pub const CS_PI: f64 = 4.263_520_979_591_08e-5;
 
-// 光速(千米/秒)
+/// 光速(千米/秒)
 pub const CS_GS: f64 = 299792.458; // 光速(千米/秒)
 
-// 每天文单位的光行时间(儒略世纪)
+/// 每天文单位的光行时间(儒略世纪)
 pub const CS_AGX: f64 = CS_AU / CS_GS / SECONDS_PER_DAY / JULIAN_CENTURY_DAYS;
 
-// 每弧度的角秒数
+/// 每弧度的角秒数
 pub const RAD: f64 = 180.0 * 3600.0 / PI;
 
-// 每弧度的度数
+/// 每弧度的度数
 pub const RADD: f64 = 180.0 / PI;
 
-// 月亮与地球的半径比(用于半影计算)
+/// 月亮与地球的半径比(用于半影计算)
 pub const CS_K: f64 = 0.2725076;
 
-// 月亮与地球的半径比(用于本影计算)
+/// 月亮与地球的半径比(用于本影计算)
 pub const CS_K2: f64 = 0.2722810;
 
-// 太阳与地球的半径比(对应959.64)
+/// 太阳与地球的半径比(对应959.64)
 pub const CS_K0: f64 = 109.1222;
 
-// 用于月亮视半径计算
+/// 用于月亮视半径计算
 pub const CS_S_MOON: f64 = CS_K * CS_R_EAR * 1.0000036 * RAD;
 
-// 用于月亮视半径计算
+/// 用于月亮视半径计算
 pub const CS_S_MOON2: f64 = CS_K2 * CS_R_EAR * 1.0000036 * RAD;
 
-// 用于太阳视半径计算
+/// 用于太阳视半径计算
 pub const CS_S_SUN: f64 = 959.64;
 
 /// 节气名称
