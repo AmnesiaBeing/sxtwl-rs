@@ -2,7 +2,7 @@
 //! 提供公历/农历转换、节气、干支等功能
 
 #![no_std]
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 
 extern crate alloc;
 
