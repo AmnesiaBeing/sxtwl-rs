@@ -9,6 +9,12 @@
 use libm::{cos, floor, sin};
 
 use crate::{
+    astronomy::{
+        calculate_time_from_apparent_solar_longitude,
+        calculate_time_from_apparent_solar_longitude_fast,
+        calculate_time_from_lunar_solar_difference,
+        calculate_time_from_lunar_solar_difference_fast, delta_t_from_j2000, fmod2,
+    },
     compressed_qishuo_correction_data::{get_qi_correction, get_shuo_correction},
     consts::{
         J2000, JIEQI_INTERVAL, JULIAN_CENTURY_DAYS, LUNAR_MONTH_DAYS, SECONDS_PER_DAY,
@@ -97,7 +103,8 @@ impl LunarPhaseCalculator {
         match calc_type {
             CalculationType::Qi => {
                 floor(self.calculate_qi_high_precision(
-                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / TROPICAL_YEAR_DAYS * 24.0 * PI / 12.0,
+                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / TROPICAL_YEAR_DAYS * 24.0 * PI
+                        / 12.0,
                 )) + 1.0
             }
             CalculationType::Shuo => {
@@ -143,7 +150,8 @@ impl LunarPhaseCalculator {
         let (ret, n): (f64, u8) = match calc_type {
             CalculationType::Qi => (
                 floor(self.calculate_qi_high_precision(
-                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / TROPICAL_YEAR_DAYS * 24.0 * PI / 12.0,
+                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / TROPICAL_YEAR_DAYS * 24.0 * PI
+                        / 12.0,
                 )) + 1.0,
                 get_qi_correction(adjusted_jd, f2),
             ),
@@ -189,18 +197,58 @@ impl LunarPhaseCalculator {
         }
     }
 
-    /// 较高精度气计算
-    fn calculate_qi_high_precision(&self, _angle: f64) -> f64 {
-        // 注意：这里需要调用XL::S_aLon_t2等函数，暂时保留接口
-        // 这些函数需要从eph.cpp中转换
-        0.0
+    /// 计算较高精度的节气时刻
+    ///
+    /// # 参数
+    /// - `angle`: 太阳视黄经（单位：弧度）
+    ///
+    /// # 返回
+    /// 对应的节气时刻（儒略日）
+    fn calculate_qi_high_precision(&self, angle: f64) -> f64 {
+        // 使用快速算法初步计算时间
+        let mut time_julian = calculate_time_from_apparent_solar_longitude_fast(angle) * 36525.0;
+
+        // 修正地球时差并转换到东八区时间
+        time_julian = time_julian - delta_t_from_j2000(time_julian) + 8.0 / 24.0;
+
+        // 计算当天的时间秒数
+        let seconds_in_day = (fmod2(time_julian + 0.5, 1.0)) * 86400.0;
+
+        // 如果接近午夜边界，使用高精度算法重新计算
+        if seconds_in_day < 1200.0 || seconds_in_day > 86400.0 - 1200.0 {
+            time_julian = calculate_time_from_apparent_solar_longitude(angle) * 36525.0
+                - delta_t_from_j2000(time_julian)
+                + 8.0 / 24.0;
+        }
+
+        time_julian
     }
 
-    /// 较高精度朔计算
-    fn calculate_shuo_high_precision(&self, _angle: f64) -> f64 {
-        // 注意：这里需要调用XL::MS_aLon_t2等函数，暂时保留接口
-        // 这些函数需要从eph.cpp中转换
-        0.0
+    /// 计算较高精度的朔时刻（新月时刻）
+    ///
+    /// # 参数
+    /// - `angle`: 月日视黄经差（单位：弧度）
+    ///
+    /// # 返回
+    /// 对应的朔时刻（儒略日）
+    fn calculate_shuo_high_precision(&self, angle: f64) -> f64 {
+        // 使用快速算法初步计算时间
+        let mut time_julian = calculate_time_from_lunar_solar_difference_fast(angle) * 36525.0;
+
+        // 修正地球时差并转换到东八区时间
+        time_julian = time_julian - delta_t_from_j2000(time_julian) + 8.0 / 24.0;
+
+        // 计算当天的时间秒数
+        let seconds_in_day = (fmod2(time_julian + 0.5, 1.0)) * 86400.0;
+
+        // 如果接近午夜边界，使用高精度算法重新计算
+        if seconds_in_day < 1800.0 || seconds_in_day > 86400.0 - 1800.0 {
+            time_julian = calculate_time_from_lunar_solar_difference(angle) * 36525.0
+                - delta_t_from_j2000(time_julian)
+                + 8.0 / 24.0;
+        }
+
+        time_julian
     }
 
     /// 低精度定朔计算

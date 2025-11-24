@@ -13,6 +13,7 @@ pub mod date;
 pub mod gz;
 pub mod julianday;
 pub mod lunar_phase_calculator;
+pub mod sxtwl;
 pub mod types;
 
 // 自动生成的气朔修正表
@@ -22,5 +23,7 @@ mod compressed_qishuo_correction_data;
 mod qishuo_fit_parameter;
 
 // 从各模块中重新导出公共API
+pub use crate::date::Day;
 pub use crate::gz::GanZhi;
-pub use crate::types::{JieQiInfo, JulianDay, SolarDate};
+pub use crate::sxtwl::*;
+pub use crate::types::{JieQiInfo, JulianDay, LunarDate, SolarDate};
