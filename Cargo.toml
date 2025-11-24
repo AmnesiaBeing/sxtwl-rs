@@ -9,15 +9,3 @@ readme = "README.md"
 
 [dependencies]
 libm = "0.2.15"
-
-[[example]]
-name = "basic_usage"
-path = "examples/basic_usage.rs"
-
-[[example]]
-name = "ganzhi_jieqi"
-path = "examples/ganzhi_jieqi.rs"
-
-[[example]]
-name = "julian_day"
-path = "examples/julian_day.rs"

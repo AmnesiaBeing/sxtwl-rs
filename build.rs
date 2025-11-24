@@ -108,7 +108,11 @@ fn main() {
     writeln!(&mut f, "use libm::floor;").unwrap();
     writeln!(&mut f).unwrap();
 
-    writeln!(&mut f, "use crate::consts::{{LUNAR_MONTH_DAYS, JIEQI_PER_YEAR, SOLAR_YEAR_DAYS}};").unwrap();
+    writeln!(
+        &mut f,
+        "use crate::consts::{{LUNAR_MONTH_DAYS, JIEQI_PER_YEAR, SOLAR_YEAR_DAYS}};"
+    )
+    .unwrap();
     writeln!(&mut f).unwrap();
 
     writeln!(&mut f, "// 每个字符用2位存储: 00=0, 01=1, 10=2").unwrap();
