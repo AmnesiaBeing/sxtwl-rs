@@ -7,29 +7,43 @@ use crate::astronomy::math_utils::{Vector3, rad2mrad};
 use crate::consts::RAD;
 use libm::{asin, atan2, cos, sin};
 
-// 岁差模型枚举
+/// 岁差模型枚举
 #[derive(PartialEq)]
 pub enum PrecessionModel {
+    /// IAU1976岁差模型
     IAU1976,
+    /// IAU2000岁差模型
     IAU2000,
+    /// P03岁差模型
     P03,
 }
-
-// 岁差量名称枚举
+/// 岁差量名称枚举
 #[derive(PartialEq)]
 pub enum PrecessionQuantity {
-    Fi, // fi
-    W,  // w
-    P,  // P
-    Q,  // Q
-    E,  // E
-    X,  // x
-    Pi, // pi
-    II, // II
-    P_, // p
-    Th, // th
-    Z,  // Z
-    Z_, // z
+    /// fi
+    Fi,
+    /// w
+    W,
+    /// P
+    P,
+    /// Q
+    Q,
+    /// E
+    E,
+    /// x
+    X,
+    /// pi
+    Pi,
+    /// II
+    II,
+    /// p
+    P_,
+    /// th
+    Th,
+    /// Z
+    Z,
+    /// z
+    Z_,
 }
 
 /// 计算岁差量
