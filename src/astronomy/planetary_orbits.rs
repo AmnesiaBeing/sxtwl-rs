@@ -76,12 +76,6 @@ pub fn xl0_calc(xt: usize, zn: usize, t: f64, n: i32) -> f64 {
     v
 }
 
-/// 返回冥王星J2000直角坐标(未实现)
-pub fn pluto_coord(t: f64) -> Vector3 {
-    // 原C++代码中这部分被注释掉了
-    Vector3::new(0.0, 0.0, 0.0)
-}
-
 /// xt星体,T儒略世纪数,n1,n2,n3为各坐标所取的项数
 pub fn p_coord(xt: usize, t: f64, n1: i32, n2: i32, n3: i32) -> Vector3 {
     let mut z = Vector3::new(0.0, 0.0, 0.0);
@@ -92,7 +86,7 @@ pub fn p_coord(xt: usize, t: f64, n1: i32, n2: i32, n3: i32) -> Vector3 {
         z.z = xl0_calc(xt, 2, t, n3);
     } else if xt == 8 {
         // 冥王星
-        z = pluto_coord(t);
+        unimplemented!()
     } else if xt == 9 {
         // 太阳
         z.x = 0.0;

@@ -1,7 +1,5 @@
 //! 天文计算系数表
 
-#[deny(clippy::approx_constant)]
-
 // 岁差系数表
 
 /// IAU1976岁差表
