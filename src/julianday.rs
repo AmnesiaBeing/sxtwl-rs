@@ -3,6 +3,7 @@
 use crate::consts::J2000;
 use crate::types::{JulianDay, SolarDate};
 
+use alloc::string::String;
 use libm::floor;
 
 impl JulianDay {

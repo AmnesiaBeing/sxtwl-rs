@@ -1,5 +1,7 @@
 //! 基础类型定义
 
+use alloc::{format, string::String};
+
 /// 儒略日（天文计算基础，高精度浮点数）
 #[derive(Clone, Copy, PartialEq, PartialOrd)]
 pub struct JulianDay(pub f64);
@@ -50,15 +52,6 @@ pub struct JieQiInfo {
     pub julian_day: f64,
     /// 节气索引
     pub jq_index: u8,
-}
-
-/// 朔气类型枚举
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum QSType {
-    /// 气
-    QiType,
-    /// 朔
-    SuoType,
 }
 
 /// 农历日期结构
