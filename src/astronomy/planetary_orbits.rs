@@ -141,9 +141,8 @@ pub fn xl1_calc(zn: usize, t: f64, n: i32) -> f64 {
         n_adj = 3;
     }
 
-    for i in 0..3 {
-        let f = ob[i];
-        let f_len = f.len();
+    for (i, item) in ob.iter().enumerate().take(3) {
+        let f_len = item.len();
 
         let n_val = floor(n_adj as f64 * f_len as f64 / 3.0 + 0.5) as usize;
         let n_val = if i > 0 { n_val + 6 } else { n_val };
@@ -152,8 +151,12 @@ pub fn xl1_calc(zn: usize, t: f64, n: i32) -> f64 {
         let mut c = 0.0;
         let mut j = 0;
         while j < n_val {
-            c +=
-                f[j] * cos(f[j + 1] + t * f[j + 2] + t2 * f[j + 3] + t3 * f[j + 4] + t4 * f[j + 5]);
+            c += item[j]
+                * cos(item[j + 1]
+                    + t * item[j + 2]
+                    + t2 * item[j + 3]
+                    + t3 * item[j + 4]
+                    + t4 * item[j + 5]);
             j += 6;
         }
 

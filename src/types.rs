@@ -1,6 +1,7 @@
 //! 基础类型定义
 
-use alloc::{format, string::String};
+use core::fmt::Display;
+
 
 /// 儒略日（天文计算基础，高精度浮点数）
 #[derive(Clone, Copy, PartialEq, PartialOrd)]
@@ -35,10 +36,13 @@ impl SolarDate {
             second,
         }
     }
+}
 
-    /// 转换为字符串表示
-    pub fn to_string(&self) -> String {
-        format!(
+/// 转换为字符串表示
+impl Display for SolarDate {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
             "{}-{:02}-{:02} {:.0}:{:.0}:{:.0}",
             self.year, self.month, self.day, self.hour, self.minute, self.second
         )
@@ -77,13 +81,15 @@ impl LunarDate {
             is_leap_month,
         }
     }
+}
 
-    /// 转换为字符串表示
-    pub fn to_string(&self) -> String {
+/// 转换为字符串表示
+impl Display for LunarDate {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         if self.is_leap_month {
-            format!("{}-闰{:02}-{:02}", self.year, self.month, self.day)
+            write!(f, "{}-闰{:02}-{:02}", self.year, self.month, self.day)
         } else {
-            format!("{}-{:02}-{:02}", self.year, self.month, self.day)
+            write!(f, "{}-{:02}-{:02}", self.year, self.month, self.day)
         }
     }
 }

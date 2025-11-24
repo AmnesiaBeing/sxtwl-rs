@@ -3,19 +3,12 @@
 use crate::consts::J2000;
 use crate::types::{JulianDay, SolarDate};
 
-use alloc::string::String;
 use libm::floor;
 
 impl JulianDay {
     /// 获取儒略日数值
     pub fn value(&self) -> f64 {
         self.0
-    }
-
-    /// 儒略日转换为时间字符串
-    pub fn to_datetime_string(&self) -> String {
-        let datetime: SolarDate = JulianDay(self.value()).into();
-        datetime.to_string()
     }
 
     /// 儒略日转换为从J2000起的天数

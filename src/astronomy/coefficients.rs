@@ -1,5 +1,7 @@
 //! 天文计算系数表
 
+#![allow(missing_docs)]
+
 // 岁差系数表
 
 /// IAU1976岁差表
@@ -185,7 +187,6 @@ pub const DT_AT: [f64; 102] = [
 ];
 
 /// 8行星星历数据表
-#[deny(missing_docs)]
 
 #[rustfmt::skip]
 pub static XL0_0:[f64; 2666] = [

@@ -3,7 +3,7 @@
 
 #![no_std]
 // #![warn(missing_docs)]
-#[deny(clippy::approx_constant)]
+#![allow(clippy::approx_constant)]
 
 extern crate alloc;
 
