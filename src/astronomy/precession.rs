@@ -1,63 +1,90 @@
-//! 岁差计算
-//! 实现各种岁差模型（IAU1976、IAU2000、P03）的坐标转换
+//! 岁差计算模块
+//!
+//! 实现多种岁差模型的坐标转换，包括：
+//! - IAU1976 岁差模型
+//! - IAU2000 岁差模型  
+//! - P03 岁差模型
+//!
+//! 岁差是地球自转轴在空间中的长期缓慢运动，主要由月球和太阳的引力引起。
 
 use crate::astronomy::coefficients::{PRECE_TAB_IAU1976, PRECE_TAB_IAU2000, PRECE_TAB_P03};
 use crate::astronomy::llr_conv;
-use crate::astronomy::math_utils::{Vector3, rad2mrad};
+use crate::astronomy::math_utils::{Vector3, normalize_rad};
 use crate::consts::RAD;
 use libm::{asin, atan2, cos, sin};
 
-/// 岁差模型枚举
-#[derive(PartialEq)]
+// =============================================================================
+// 类型定义
+// =============================================================================
+
+/// 岁差计算模型
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PrecessionModel {
-    /// IAU1976岁差模型
+    /// IAU1976 岁差模型（Lieske 模型）
     IAU1976,
-    /// IAU2000岁差模型
+    /// IAU2000 岁差模型
     IAU2000,
-    /// P03岁差模型
+    /// P03 岁差模型（Capitaine 等人，2003）
     P03,
 }
-/// 岁差量名称枚举
-#[derive(PartialEq)]
+
+/// 岁差量类型
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PrecessionQuantity {
-    /// fi
+    /// 黄经岁差角 (φ)
     Fi,
-    /// w
+    /// 倾角相关参数 (ω)
     W,
-    /// P
+    /// 赤经岁差 (P)
     P,
-    /// Q
+    /// 赤纬岁差 (Q)
     Q,
-    /// E
+    /// 黄赤交角 (ε)
     E,
-    /// x
+    /// 黄道岁差 (χ)
     X,
-    /// pi
+    /// 赤道岁差 (π)
     Pi,
-    /// II
+    /// 赤道岁差 (II)
     II,
-    /// p
+    /// 赤道岁差 (p)
     P_,
-    /// th
+    /// 赤道岁差 (θ)
     Th,
-    /// Z
+    /// 赤道岁差 (Z)
     Z,
-    /// z
+    /// 赤道岁差 (z)
     Z_,
 }
 
-/// 计算岁差量
-/// t: 儒略世纪数
-/// sc: 岁差量名称
-/// mx: 岁差模型
-pub fn prece(t: f64, sc: PrecessionQuantity, mx: &PrecessionModel) -> f64 {
-    let (n, p) = match mx {
+// =============================================================================
+// 岁差量计算
+// =============================================================================
+
+/// 计算指定岁差量的值
+///
+/// # 参数
+/// - `julian_centuries`: 从 J2000.0 起算的儒略世纪数
+/// - `quantity`: 要计算的岁差量类型
+/// - `model`: 使用的岁差模型
+///
+/// # 返回值
+/// 岁差量值（弧度）
+///
+/// # 说明
+/// 不同岁差模型使用不同的多项式系数表
+pub fn calculate_precession_quantity(
+    julian_centuries: f64,
+    quantity: &PrecessionQuantity,
+    model: &PrecessionModel,
+) -> f64 {
+    let (coefficient_count, coefficients) = match model {
         PrecessionModel::IAU1976 => (4, &PRECE_TAB_IAU1976[..]),
         PrecessionModel::IAU2000 => (6, &PRECE_TAB_IAU2000[..]),
         PrecessionModel::P03 => (6, &PRECE_TAB_P03[..]),
     };
 
-    let isc = match sc {
+    let quantity_index = match quantity {
         PrecessionQuantity::Fi => 0,
         PrecessionQuantity::W => 1,
         PrecessionQuantity::P => 2,
@@ -72,79 +99,225 @@ pub fn prece(t: f64, sc: PrecessionQuantity, mx: &PrecessionModel) -> f64 {
         PrecessionQuantity::Z_ => 11,
     };
 
+    // 计算多项式值
     let mut result = 0.0;
-    let mut tn = 1.0;
-    for i in 0..n {
-        result += p[isc * n + i] * tn;
-        tn *= t;
+    let mut time_power = 1.0;
+
+    for i in 0..coefficient_count {
+        let coefficient_index = quantity_index * coefficient_count + i;
+        result += coefficients[coefficient_index] * time_power;
+        time_power *= julian_centuries;
     }
 
+    // 转换为弧度（原始系数单位为角秒）
     result / RAD
 }
 
-/// 返回P03黄赤交角，t是世纪数
-pub fn hcjj(t: f64) -> f64 {
+/// 计算 P03 模型的黄赤交角
+///
+/// # 参数
+/// - `julian_centuries`: 从 J2000.0 起算的儒略世纪数
+///
+/// # 返回值
+/// 黄赤交角（弧度）
+///
+/// # 说明
+/// 基于 Capitaine 等人 2003 年的模型
+pub fn calculate_obliquity_p03(julian_centuries: f64) -> f64 {
+    let t = julian_centuries;
     let t2 = t * t;
     let t3 = t2 * t;
     let t4 = t3 * t;
     let t5 = t4 * t;
+
+    // 多项式系数基于 P03 模型
     (84381.4060 - 46.836769 * t - 0.0001831 * t2 + 0.00200340 * t3 - 5.76e-7 * t4 - 4.34e-8 * t5)
         / RAD
 }
 
-/// J2000赤道转Date赤道
-pub fn cdllr_j2d(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
-    let z_val = prece(t, PrecessionQuantity::Z, mx) + llr.x;
-    let z_small = prece(t, PrecessionQuantity::Z_, mx);
-    let th = prece(t, PrecessionQuantity::Th, mx);
+// =============================================================================
+// 赤道坐标转换
+// =============================================================================
 
-    let cos_w = cos(llr.y);
-    let cos_h = cos(th);
-    let sin_w = sin(llr.y);
-    let sin_h = sin(th);
+/// 将赤道坐标从 J2000.0 历元转换到指定历元
+///
+/// # 参数
+/// - `julian_centuries`: 目标历元相对于 J2000.0 的儒略世纪数
+/// - `equatorial_coords`: J2000.0 历元的赤道坐标 (赤经, 赤纬, 距离)
+/// - `model`: 使用的岁差模型
+///
+/// # 返回值
+/// 目标历元的赤道坐标
+pub fn transform_equatorial_j2000_to_date(
+    julian_centuries: f64,
+    equatorial_coords: Vector3,
+    model: PrecessionModel,
+) -> Vector3 {
+    let zeta = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Z, &model);
+    let z = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Z_, &model);
+    let theta = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Th, &model);
 
-    let a = cos_w * sin(z_val);
-    let b = cos_h * cos_w * cos(z_val) - sin_h * sin_w;
-    let c = sin_h * cos_w * cos(z_val) + cos_h * sin_w;
+    let right_ascension = equatorial_coords.x;
+    let declination = equatorial_coords.y;
+    let distance = equatorial_coords.z;
 
-    Vector3::new(rad2mrad(atan2(a, b) + z_small), asin(c), llr.z)
+    let cos_declination = cos(declination);
+    let cos_theta = cos(theta);
+    let sin_declination = sin(declination);
+    let sin_theta = sin(theta);
+
+    // 应用岁差旋转矩阵
+    let a = cos_declination * sin(right_ascension + zeta);
+    let b = cos_theta * cos_declination * cos(right_ascension + zeta) - sin_theta * sin_declination;
+    let c = sin_theta * cos_declination * cos(right_ascension + zeta) + cos_theta * sin_declination;
+
+    Vector3::new(normalize_rad(atan2(a, b) + z), asin(c), distance)
 }
 
-/// Date赤道转J2000赤道
-pub fn cdllr_d2j(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
-    let z_val = -prece(t, PrecessionQuantity::Z_, mx) + llr.x;
-    let z_small = -prece(t, PrecessionQuantity::Z, mx);
-    let th = -prece(t, PrecessionQuantity::Th, mx);
+/// 将赤道坐标从指定历元转换到 J2000.0 历元
+///
+/// # 参数
+/// - `julian_centuries`: 原始历元相对于 J2000.0 的儒略世纪数
+/// - `equatorial_coords`: 原始历元的赤道坐标
+/// - `model`: 使用的岁差模型
+///
+/// # 返回值
+/// J2000.0 历元的赤道坐标
+pub fn transform_equatorial_date_to_j2000(
+    julian_centuries: f64,
+    equatorial_coords: Vector3,
+    model: PrecessionModel,
+) -> Vector3 {
+    let zeta = -calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Z_, &model);
+    let z = -calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Z, &model);
+    let theta = -calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Th, &model);
 
-    let cos_w = cos(llr.y);
-    let cos_h = cos(th);
-    let sin_w = sin(llr.y);
-    let sin_h = sin(th);
+    let right_ascension = equatorial_coords.x;
+    let declination = equatorial_coords.y;
+    let distance = equatorial_coords.z;
 
-    let a = cos_w * sin(z_val);
-    let b = cos_h * cos_w * cos(z_val) - sin_h * sin_w;
-    let c = sin_h * cos_w * cos(z_val) + cos_h * sin_w;
+    let cos_declination = cos(declination);
+    let cos_theta = cos(theta);
+    let sin_declination = sin(declination);
+    let sin_theta = sin(theta);
 
-    Vector3::new(rad2mrad(atan2(a, b) + z_small), asin(c), llr.z)
+    // 应用逆岁差旋转矩阵
+    let a = cos_declination * sin(right_ascension + zeta);
+    let b = cos_theta * cos_declination * cos(right_ascension + zeta) - sin_theta * sin_declination;
+    let c = sin_theta * cos_declination * cos(right_ascension + zeta) + cos_theta * sin_declination;
+
+    Vector3::new(normalize_rad(atan2(a, b) + z), asin(c), distance)
 }
 
-/// 黄道球面坐标_J2000转Date分点，t为儒略世纪数
-pub fn hdllr_j2d(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
-    // J2000黄道旋转到Date黄道(球面对球面)
-    let mut r = Vector3::new(llr.x, llr.y, llr.z);
-    r.x += prece(t, PrecessionQuantity::Fi, mx);
-    r = llr_conv(r, prece(t, PrecessionQuantity::W, mx));
-    r.x -= prece(t, PrecessionQuantity::X, mx);
-    r = llr_conv(r, -prece(t, PrecessionQuantity::E, mx));
-    r
+// =============================================================================
+// 黄道坐标转换
+// =============================================================================
+
+/// 将黄道坐标从 J2000.0 历元转换到指定历元
+///
+/// # 参数
+/// - `julian_centuries`: 目标历元相对于 J2000.0 的儒略世纪数
+/// - `ecliptic_coords`: J2000.0 历元的黄道坐标 (黄经, 黄纬, 距离)
+/// - `model`: 使用的岁差模型
+///
+/// # 返回值
+/// 目标历元的黄道坐标
+pub fn transform_ecliptic_j2000_to_date(
+    julian_centuries: f64,
+    ecliptic_coords: Vector3,
+    model: PrecessionModel,
+) -> Vector3 {
+    let mut transformed = ecliptic_coords;
+
+    // 应用三次旋转转换黄道坐标
+    let phi = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Fi, &model);
+    let omega = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::W, &model);
+    let chi = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::X, &model);
+    let epsilon = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::E, &model);
+
+    // 第一步：黄经岁差
+    transformed.x += phi;
+
+    // 第二步：绕新黄极旋转
+    transformed = llr_conv(transformed, omega);
+
+    // 第三步：黄道岁差
+    transformed.x -= chi;
+
+    // 第四步：黄赤交角变化
+    transformed = llr_conv(transformed, -epsilon);
+
+    transformed
 }
 
-/// 黄道球面坐标_Date分点转J2000，t为儒略世纪数
-pub fn hdllr_d2j(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
-    let mut r = Vector3::new(llr.x, llr.y, llr.z);
-    r = llr_conv(r, prece(t, PrecessionQuantity::E, mx));
-    r.x += prece(t, PrecessionQuantity::X, mx);
-    r = llr_conv(r, -prece(t, PrecessionQuantity::W, mx));
-    r.x -= prece(t, PrecessionQuantity::Fi, mx);
-    Vector3::new(rad2mrad(r.x), r.y, r.z)
+/// 将黄道坐标从指定历元转换到 J2000.0 历元
+///
+/// # 参数
+/// - `julian_centuries`: 原始历元相对于 J2000.0 的儒略世纪数
+/// - `ecliptic_coords`: 原始历元的黄道坐标
+/// - `model`: 使用的岁差模型
+///
+/// # 返回值
+/// J2000.0 历元的黄道坐标
+pub fn transform_ecliptic_date_to_j2000(
+    julian_centuries: f64,
+    ecliptic_coords: Vector3,
+    model: PrecessionModel,
+) -> Vector3 {
+    let mut transformed = ecliptic_coords;
+
+    // 应用逆转换步骤
+    let phi = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::Fi, &model);
+    let omega = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::W, &model);
+    let chi = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::X, &model);
+    let epsilon = calculate_precession_quantity(julian_centuries, &PrecessionQuantity::E, &model);
+
+    // 逆序执行转换步骤
+    transformed = llr_conv(transformed, epsilon);
+    transformed.x += chi;
+    transformed = llr_conv(transformed, -omega);
+    transformed.x -= phi;
+
+    Vector3::new(normalize_rad(transformed.x), transformed.y, transformed.z)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_precession_quantity_calculation() {
+        let result =
+            calculate_precession_quantity(0.1, &PrecessionQuantity::Z, &PrecessionModel::P03);
+        // 验证结果在合理范围内
+        assert!(result.abs() < 0.1);
+    }
+
+    #[test]
+    fn test_obliquity_calculation() {
+        let obliquity = calculate_obliquity_p03(0.1);
+        // 黄赤交角应该在合理范围内（约23.5度）
+        assert!(obliquity > 0.4 && obliquity < 0.5);
+    }
+
+    #[test]
+    fn test_equatorial_transformation() {
+        let j2000_coords = Vector3::new(1.0, 0.5, 1.0);
+        let transformed =
+            transform_equatorial_j2000_to_date(0.1, j2000_coords, PrecessionModel::P03);
+
+        // 验证坐标仍然有效
+        assert!(transformed.x.abs() < 10.0);
+        assert!(transformed.y.abs() <= 1.57); // 赤纬范围 [-π/2, π/2]
+    }
+
+    #[test]
+    fn test_ecliptic_transformation() {
+        let j2000_coords = Vector3::new(1.0, 0.2, 1.0);
+        let transformed = transform_ecliptic_j2000_to_date(0.1, j2000_coords, PrecessionModel::P03);
+
+        // 验证坐标仍然有效
+        assert!(transformed.x.abs() < 10.0);
+        assert!(transformed.y.abs() <= 1.57);
+    }
 }

@@ -12,7 +12,7 @@ use crate::{
     compressed_qishuo_correction_data::{get_qi_correction, get_shuo_correction},
     consts::{
         J2000, JIEQI_INTERVAL, JULIAN_CENTURY_DAYS, LUNAR_MONTH_DAYS, SECONDS_PER_DAY,
-        SOLAR_YEAR_DAYS,
+        TROPICAL_YEAR_DAYS,
     },
     qishuo_fit_parameter::{FitParameter, QI_FIT_PARAMETERS, SHUO_FIT_PARAMETERS},
 };
@@ -97,7 +97,7 @@ impl LunarPhaseCalculator {
         match calc_type {
             CalculationType::Qi => {
                 floor(self.calculate_qi_high_precision(
-                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / SOLAR_YEAR_DAYS * 24.0 * PI / 12.0,
+                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / TROPICAL_YEAR_DAYS * 24.0 * PI / 12.0,
                 )) + 1.0
             }
             CalculationType::Shuo => {
@@ -143,7 +143,7 @@ impl LunarPhaseCalculator {
         let (ret, n): (f64, u8) = match calc_type {
             CalculationType::Qi => (
                 floor(self.calculate_qi_high_precision(
-                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / SOLAR_YEAR_DAYS * 24.0 * PI / 12.0,
+                    (adjusted_jd + pc - JD_1999_3_21_12_00_00) / TROPICAL_YEAR_DAYS * 24.0 * PI / 12.0,
                 )) + 1.0,
                 get_qi_correction(adjusted_jd, f2),
             ),
@@ -256,11 +256,11 @@ impl LunarPhaseCalculator {
 
     fn calculate_base_date(&self, julian_day: f64) -> f64 {
         let mut base =
-            floor((julian_day - 355.0 + 183.0) / SOLAR_YEAR_DAYS) * SOLAR_YEAR_DAYS + 355.0;
+            floor((julian_day - 355.0 + 183.0) / TROPICAL_YEAR_DAYS) * TROPICAL_YEAR_DAYS + 355.0;
 
         // 调整基准日期
         if self.calculate_phase(base, CalculationType::Qi) > julian_day {
-            base -= SOLAR_YEAR_DAYS;
+            base -= TROPICAL_YEAR_DAYS;
         }
 
         base
