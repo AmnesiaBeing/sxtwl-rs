@@ -9,7 +9,7 @@ use crate::{
     },
     consts::RAD,
 };
-use core::f64::consts::{PI, TAU as PI2};
+use core::f64::consts::PI;
 use libm::{cos, sin, tan};
 
 /// 章动计算

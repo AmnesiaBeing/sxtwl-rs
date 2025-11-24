@@ -20,7 +20,7 @@ impl JulianDay {
 
     /// 儒略日转换为从J2000起的天数
     pub fn to_j2000_days(jd: f64) -> i32 {
-        floor(jd - J2000 as f64) as i32
+        floor(jd - J2000) as i32
     }
 
     /// 从J2000起的天数转换为儒略日
@@ -56,8 +56,8 @@ impl From<SolarDate> for JulianDay {
         };
 
         // 计算儒略日值
-        let jd_value = floor(365.25 * (adjusted_year + 4716) as f64) as f64
-            + floor(30.6001 * (adjusted_month + 1) as f64) as f64
+        let jd_value = floor(365.25 * (adjusted_year + 4716) as f64)
+            + floor(30.6001 * (adjusted_month + 1) as f64)
             + day_with_time
             + century_correction
             - 1524.5;

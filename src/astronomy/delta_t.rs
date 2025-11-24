@@ -2,8 +2,6 @@
 //! 实现TD-UT时间差的计算（地球自转的不规则性修正）
 
 use crate::astronomy::coefficients::DT_AT;
-use crate::consts::J2000;
-use libm::{fabs, pow, sin, sqrt};
 
 /// 二次曲线外推
 /// y: 年份

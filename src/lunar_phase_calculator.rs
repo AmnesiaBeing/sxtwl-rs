@@ -25,7 +25,7 @@ const JD_2000_1_7_12_00_00: f64 = 2451551.0; // 2000年1月7日12:00:00的儒略
 
 // 计算类型枚举 - 内部使用
 #[derive(PartialEq, Eq)]
-enum CalculationType {
+pub(crate) enum CalculationType {
     Qi,   // 节气
     Shuo, // 朔日
 }
@@ -37,35 +37,31 @@ enum CalculationMethod {
     FixedPhase,    // 定朔相位计算，用于1645年以后至1999年3月21日之间的日期
 }
 
-// 农历相位计算器
+/// 农历相位计算器
+#[derive(Default)]
 pub struct LunarPhaseCalculator {
-    pub jieqi: [f64; 25],    // 计算后的25个节气的儒略日，从冬至开始到下一个冬至以后
-    pub pre_jieqi: [f64; 2], // 当前计算农历年的上一年的前一个节气和前前一个节气的儒略日
-    pub shuo: [f64; 14],     // 计算后的14个朔日，每个朔日的儒略日
-    pub month_indices: [i32; 14], // 计算后的12个月的月序，每个月的月序从1开始
-    pub month_lengths: [f64; 14], // 计算后的12个月的天数，每个月的天数从1开始
-    pub leap_month: Option<i32>, // 计算后的闰月，None表示没有闰月
+    /// 计算后的25个节气的儒略日，从冬至开始到下一个冬至以后
+    pub jieqi: [f64; 25],
+    /// 当前计算农历年的上一年的前一个节气和前前一个节气的儒略日
+    pub pre_jieqi: [f64; 2],
+    /// 计算后的14个朔日，每个朔日的儒略日
+    pub shuo: [f64; 14],
+    /// 计算后的12个月的月序，每个月的月序从1开始
+    pub month_indices: [i32; 14],
+    /// 计算后的12个月的天数，每个月的天数从1开始
+    pub month_lengths: [f64; 14],
+    /// 计算后的闰月，None表示没有闰月
+    pub leap_month: Option<i32>,
 }
 
 impl LunarPhaseCalculator {
-    pub fn new() -> Self {
-        Self {
-            jieqi: [0.0; 25],
-            pre_jieqi: [0.0, 0.0],
-            shuo: [0.0; 14],
-            month_indices: [0; 14],
-            month_lengths: [0.0; 14],
-            leap_month: None,
-        }
-    }
-
     fn determine_calculation_method(
         &self,
         jd: f64,
         calc_type: &CalculationType,
     ) -> CalculationMethod {
-        let params = self.get_fit_parameters(&calc_type);
-        let pc = self.get_period_constant(&calc_type);
+        let params = self.get_fit_parameters(calc_type);
+        let pc = self.get_period_constant(calc_type);
 
         let f1 = params[0].start_julian_day - pc;
         let f2 = params.last().unwrap().start_julian_day - pc;
@@ -82,8 +78,8 @@ impl LunarPhaseCalculator {
     #[inline]
     fn get_fit_parameters(&self, calc_type: &CalculationType) -> &[FitParameter] {
         match calc_type {
-            CalculationType::Qi => &QI_FIT_PARAMETERS,
-            CalculationType::Shuo => &SHUO_FIT_PARAMETERS,
+            CalculationType::Qi => QI_FIT_PARAMETERS,
+            CalculationType::Shuo => SHUO_FIT_PARAMETERS,
         }
     }
 
@@ -134,13 +130,13 @@ impl LunarPhaseCalculator {
             result += 1.0;
         }
 
-        return result - J2000;
+        result - J2000
     }
 
     // 定气或定朔
     fn calculate_fixed_phase(&self, adjusted_jd: f64, calc_type: &CalculationType) -> f64 {
-        let params = self.get_fit_parameters(&calc_type);
-        let pc = self.get_period_constant(&calc_type);
+        let params = self.get_fit_parameters(calc_type);
+        let pc = self.get_period_constant(calc_type);
         let f2 = params.last().unwrap().start_julian_day - pc;
         let pc = self.get_period_constant(calc_type);
 
@@ -181,7 +177,7 @@ impl LunarPhaseCalculator {
     /// - 高精度算法：1999年之前及修正表记录之前
     /// - 平气朔表：1645年以前  
     /// - 定朔相位：1645年至1999年之间
-    pub fn calculate_phase(&self, jd: f64, calc_type: CalculationType) -> f64 {
+    pub(crate) fn calculate_phase(&self, jd: f64, calc_type: CalculationType) -> f64 {
         let adjusted_jd = jd + J2000;
 
         match self.determine_calculation_method(adjusted_jd, &calc_type) {
@@ -260,7 +256,7 @@ impl LunarPhaseCalculator {
 
     fn calculate_base_date(&self, julian_day: f64) -> f64 {
         let mut base =
-            floor((julian_day - 355.0 + 183.0) as f64 / SOLAR_YEAR_DAYS) * SOLAR_YEAR_DAYS + 355.0;
+            floor((julian_day - 355.0 + 183.0) / SOLAR_YEAR_DAYS) * SOLAR_YEAR_DAYS + 355.0;
 
         // 调整基准日期
         if self.calculate_phase(base, CalculationType::Qi) > julian_day {
@@ -279,16 +275,15 @@ impl LunarPhaseCalculator {
 
         // 补算二气
         self.pre_jieqi = [
-            self.calculate_phase(base_date - JIEQI_INTERVAL, CalculationType::Qi) as f64,
-            self.calculate_phase(base_date - JIEQI_INTERVAL * 2.0, CalculationType::Qi) as f64,
+            self.calculate_phase(base_date - JIEQI_INTERVAL, CalculationType::Qi),
+            self.calculate_phase(base_date - JIEQI_INTERVAL * 2.0, CalculationType::Qi),
         ];
     }
 
     // 计算24个朔日时刻
     fn calculate_shuo(&mut self) {
         // 求较靠近冬至的朔日
-        let mut nearest_dongzhi_shuo =
-            self.calculate_phase(self.jieqi[0], CalculationType::Shuo) as f64;
+        let mut nearest_dongzhi_shuo = self.calculate_phase(self.jieqi[0], CalculationType::Shuo);
         // 确保朔日不晚于冬至
         if nearest_dongzhi_shuo > self.jieqi[0] {
             nearest_dongzhi_shuo -= LUNAR_MONTH_DAYS;

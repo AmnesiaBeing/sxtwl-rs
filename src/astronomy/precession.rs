@@ -3,10 +3,9 @@
 
 use crate::astronomy::coefficients::{PRECE_TAB_IAU1976, PRECE_TAB_IAU2000, PRECE_TAB_P03};
 use crate::astronomy::llr_conv;
-use crate::astronomy::math_utils::{Vector3, llr2xyz, mod2, rad2mrad, xyz2llr};
+use crate::astronomy::math_utils::{Vector3, rad2mrad};
 use crate::consts::RAD;
-use core::f64::consts::{PI, TAU as PI2};
-use libm::{asin, atan2, cos, sin, sqrt};
+use libm::{asin, atan2, cos, sin};
 
 // 岁差模型枚举
 #[derive(PartialEq)]
@@ -81,9 +80,9 @@ pub fn hcjj(t: f64) -> f64 {
 
 /// J2000赤道转Date赤道
 pub fn cdllr_j2d(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
-    let z_val = prece(t, PrecessionQuantity::Z, &mx) + llr.x;
-    let z_small = prece(t, PrecessionQuantity::Z_, &mx);
-    let th = prece(t, PrecessionQuantity::Th, &mx);
+    let z_val = prece(t, PrecessionQuantity::Z, mx) + llr.x;
+    let z_small = prece(t, PrecessionQuantity::Z_, mx);
+    let th = prece(t, PrecessionQuantity::Th, mx);
 
     let cos_w = cos(llr.y);
     let cos_h = cos(th);
@@ -99,9 +98,9 @@ pub fn cdllr_j2d(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
 
 /// Date赤道转J2000赤道
 pub fn cdllr_d2j(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
-    let z_val = -prece(t, PrecessionQuantity::Z_, &mx) + llr.x;
-    let z_small = -prece(t, PrecessionQuantity::Z, &mx);
-    let th = -prece(t, PrecessionQuantity::Th, &mx);
+    let z_val = -prece(t, PrecessionQuantity::Z_, mx) + llr.x;
+    let z_small = -prece(t, PrecessionQuantity::Z, mx);
+    let th = -prece(t, PrecessionQuantity::Th, mx);
 
     let cos_w = cos(llr.y);
     let cos_h = cos(th);
@@ -119,19 +118,19 @@ pub fn cdllr_d2j(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
 pub fn hdllr_j2d(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
     // J2000黄道旋转到Date黄道(球面对球面)
     let mut r = Vector3::new(llr.x, llr.y, llr.z);
-    r.x += prece(t, PrecessionQuantity::Fi, &mx);
-    r = llr_conv(r, prece(t, PrecessionQuantity::W, &mx));
-    r.x -= prece(t, PrecessionQuantity::X, &mx);
-    r = llr_conv(r, -prece(t, PrecessionQuantity::E, &mx));
+    r.x += prece(t, PrecessionQuantity::Fi, mx);
+    r = llr_conv(r, prece(t, PrecessionQuantity::W, mx));
+    r.x -= prece(t, PrecessionQuantity::X, mx);
+    r = llr_conv(r, -prece(t, PrecessionQuantity::E, mx));
     r
 }
 
 /// 黄道球面坐标_Date分点转J2000，t为儒略世纪数
 pub fn hdllr_d2j(t: f64, llr: Vector3, mx: &PrecessionModel) -> Vector3 {
     let mut r = Vector3::new(llr.x, llr.y, llr.z);
-    r = llr_conv(r, prece(t, PrecessionQuantity::E, &mx));
-    r.x += prece(t, PrecessionQuantity::X, &mx);
-    r = llr_conv(r, -prece(t, PrecessionQuantity::W, &mx));
-    r.x -= prece(t, PrecessionQuantity::Fi, &mx);
+    r = llr_conv(r, prece(t, PrecessionQuantity::E, mx));
+    r.x += prece(t, PrecessionQuantity::X, mx);
+    r = llr_conv(r, -prece(t, PrecessionQuantity::W, mx));
+    r.x -= prece(t, PrecessionQuantity::Fi, mx);
     Vector3::new(rad2mrad(r.x), r.y, r.z)
 }

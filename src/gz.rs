@@ -29,7 +29,7 @@ impl GanZhi {
 
         // 计算索引
         for i in 0..6 {
-            if (self.tian_gan + i * 10) % 12 == self.di_zhi as u8 {
+            if (self.tian_gan + i * 10) % 12 == self.di_zhi {
                 return Ok(self.tian_gan + i * 10);
             }
         }

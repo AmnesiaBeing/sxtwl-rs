@@ -7,7 +7,7 @@ use original_qishuo_strings::{QI_S, SHUO_S};
 
 fn jieya(s: &str) -> String {
     let o = "0000000000";
-    let o2 = format!("{}{}", o, o);
+    let o2 = format!("{o}{o}");
 
     let mut result = s.to_string();
 
@@ -36,12 +36,12 @@ fn jieya(s: &str) -> String {
         ("c", "00000001"),
         ("b", "000000001"),
         ("a", "0000000001"),
-        ("A", &format!("{}{}{}", o2, o2, o2)),
-        ("B", &format!("{}{}{}", o2, o2, o)),
-        ("C", &format!("{}{}", o2, o2)),
-        ("D", &format!("{}{}", o2, o)),
+        ("A", &format!("{o2}{o2}{o2}")),
+        ("B", &format!("{o2}{o2}{o}")),
+        ("C", &format!("{o2}{o2}")),
+        ("D", &format!("{o2}{o}")),
         ("E", &o2),
-        ("F", &o),
+        ("F", o),
     ];
 
     for (from, to) in replacements.iter() {
@@ -116,10 +116,10 @@ fn main() {
     writeln!(&mut f).unwrap();
 
     writeln!(&mut f, "// 每个字符用2位存储: 00=0, 01=1, 10=2").unwrap();
-    writeln!(&mut f, "pub const SHUO_BYTES: &[u8] = &{:?};", shuo_bytes).unwrap();
-    writeln!(&mut f, "pub const SHUO_LEN: usize = {};", shuo_len).unwrap();
-    writeln!(&mut f, "pub const QI_BYTES: &[u8] = &{:?};", qi_bytes).unwrap();
-    writeln!(&mut f, "pub const QI_LEN: usize = {};", qi_len).unwrap();
+    writeln!(&mut f, "pub const SHUO_BYTES: &[u8] = &{shuo_bytes:?};").unwrap();
+    writeln!(&mut f, "pub const SHUO_LEN: usize = {shuo_len};").unwrap();
+    writeln!(&mut f, "pub const QI_BYTES: &[u8] = &{qi_bytes:?};").unwrap();
+    writeln!(&mut f, "pub const QI_LEN: usize = {qi_len};").unwrap();
     writeln!(&mut f).unwrap();
 
     writeln!(&mut f, "/// 从2位压缩数据中获取指定索引的值 (0, 1, 或 2)").unwrap();
@@ -206,12 +206,12 @@ fn main() {
     writeln!(&mut f).unwrap();
     writeln!(&mut f, "    #[test]").unwrap();
     writeln!(&mut f, "    fn verify_lengths() {{").unwrap();
-    writeln!(&mut f, "        assert_eq!(SHUO_LEN, {});", shuo_len).unwrap();
-    writeln!(&mut f, "        assert_eq!(QI_LEN, {});", qi_len).unwrap();
+    writeln!(&mut f, "        assert_eq!(SHUO_LEN, {shuo_len});").unwrap();
+    writeln!(&mut f, "        assert_eq!(QI_LEN, {qi_len});").unwrap();
     writeln!(&mut f, "    }}").unwrap();
     writeln!(&mut f, "}}").unwrap();
 
-    println!("生成压缩数据到: {:?}", dest_path);
+    println!("生成压缩数据到: {dest_path:?}");
     println!(
         "朔日表: {}字符 -> {}字节 (压缩率: {:.1}%)",
         SHUO_S.len(),
@@ -228,6 +228,6 @@ fn main() {
 
     // 验证解压是否正确
     println!("\n验证解压:");
-    println!("朔日表解压后长度: {} (应为16599)", shuo_len);
-    println!("节气表解压后长度: {} (应为7567)", qi_len);
+    println!("朔日表解压后长度: {shuo_len} (应为16599)");
+    println!("节气表解压后长度: {qi_len} (应为7567)");
 }

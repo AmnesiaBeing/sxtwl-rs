@@ -5,10 +5,10 @@ use crate::{
     astronomy::{
         Vector2, Vector3, XL0, XL0_XZB, XL1, dt_t, hcjj, llr_conv, nutation_lon2, rad2rrad,
     },
-    consts::{CS_R_EAR, CS_S_MOON, J2000, JULIAN_CENTURY_DAYS, RAD},
+    consts::{CS_R_EAR, CS_S_MOON, RAD},
 };
 use core::f64::consts::{PI, TAU as PI2};
-use libm::{acos, asin, atan2, cos, fabs, floor, sin, sqrt};
+use libm::{acos, asin, atan2, cos, fabs, floor, sin};
 
 /// xt星体,zn坐标号,t儒略世纪数,n计算项数
 pub fn xl0_calc(xt: usize, zn: usize, t: f64, n: i32) -> f64 {
@@ -33,7 +33,7 @@ pub fn xl0_calc(xt: usize, zn: usize, t: f64, n: i32) -> f64 {
         let n_val = if n < 0 {
             n2
         } else {
-            let mut n_calc = floor(3.0 * n as f64 * n0 / n0_total + 0.5) as f64 + n1;
+            let mut n_calc = floor(3.0 * n as f64 * n0 / n0_total + 0.5) + n1;
             if i > 0 {
                 n_calc += 3.0;
             }
@@ -206,7 +206,7 @@ pub fn p_gst(t: f64, dt: f64) -> f64 {
     let t3 = t2 * t_century;
     let t4 = t3 * t_century;
 
-    PI2 * (0.7790572732640 + 1.00273781191135448 * t)
+    PI2 * (0.7790572732640 + 1.002_737_811_911_354_6 * t)
         + (0.014506 + 4612.15739966 * t_century + 1.39667721 * t2 - 0.00009344 * t3
             + 0.00001882 * t4)
             / RAD
@@ -237,7 +237,7 @@ pub fn sun_sheng_j(jd: f64, l: f64, fa: f64, sj: f64) -> f64 {
         let cos_j = cos(j);
 
         // 恒星时(子午圈位置)
-        let gst = (0.7790572732640 + 1.00273781191135448 * jd) * 2.0 * PI
+        let gst = (0.7790572732640 + 1.002_737_811_911_354_6 * jd) * 2.0 * PI
             + (0.014506 + 4612.15739966 * t + 1.39667721 * t * t) / RAD;
 
         let a = atan2(sin_j * cos(e), cos_j); // 太阳赤经

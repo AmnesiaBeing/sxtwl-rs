@@ -47,7 +47,7 @@ pub const CS_SINP: f64 = CS_R_EAR / CS_AU;
 
 // 太阳视差
 // pub const CS_PI: f64 = CS_SINP.asin(); // 太阳视差 Rust暂不支持常量计算asin
-pub const CS_PI: f64 = 4.2635209795910802e-05;
+pub const CS_PI: f64 = 4.263_520_979_591_08e-5;
 
 // 光速(千米/秒)
 pub const CS_GS: f64 = 299792.458; // 光速(千米/秒)

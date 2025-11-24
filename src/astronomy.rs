@@ -3,8 +3,6 @@
 //! 基于寿星天文历算法实现
 
 use crate::consts::{J2000, JULIAN_CENTURY_DAYS};
-use core::f64::consts::{PI, TAU as PI2};
-use libm::{asin, atan2, cos, sin, sqrt};
 
 mod coefficients;
 mod delta_t;
