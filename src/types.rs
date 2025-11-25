@@ -1,95 +1,167 @@
-//! 基础类型定义
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 
-use core::fmt::Display;
-
-
-/// 儒略日（天文计算基础，高精度浮点数）
-#[derive(Clone, Copy, PartialEq, PartialOrd)]
-pub struct JulianDay(pub f64);
-
-/// 时间结构
-#[derive(Debug, Clone, Copy)]
-pub struct SolarDate {
-    /// 年份
-    pub year: i32,
-    /// 月份（1-12）
-    pub month: u8,
-    /// 日期（1-31）
-    pub day: u8,
-    /// 小时（0-23）
-    pub hour: u8,
-    /// 分钟（0-59）
-    pub minute: u8,
-    /// 秒（0-59.999...）
-    pub second: f64,
+/// 传统文化(民俗)
+pub trait Culture {
+    /// Return 名称
+    fn get_name(&self) -> String;
 }
 
-impl SolarDate {
-    /// 创建新的时间实例
-    pub fn new(year: i32, month: u8, day: u8, hour: u8, minute: u8, second: f64) -> Self {
+pub trait Tyme: Culture {
+    fn next(&self, n: isize) -> Self
+    where
+        Self: Sized;
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct AbstractCulture {}
+
+impl Culture for AbstractCulture {
+    fn get_name(&self) -> String {
+        unimplemented!()
+    }
+}
+
+impl AbstractCulture {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    pub fn index_of(&self, index: isize, size: usize) -> usize {
+        let n: isize = size as isize;
+        let mut i: isize = index % n;
+        if i < 0 {
+            i += n;
+        }
+        i as usize
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct AbstractCultureDay {
+    culture: AbstractCulture,
+    day_index: usize,
+}
+
+impl Culture for AbstractCultureDay {
+    fn get_name(&self) -> String {
+        self.culture.get_name()
+    }
+}
+
+impl AbstractCultureDay {
+    pub fn new(culture: AbstractCulture, day_index: usize) -> Self {
+        Self { culture, day_index }
+    }
+
+    pub fn get_day_index(&self) -> usize {
+        self.day_index
+    }
+
+    pub fn get_culture(&self) -> AbstractCulture {
+        self.culture
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct AbstractTyme {
+    parent: AbstractCulture,
+}
+
+impl AbstractTyme {
+    pub fn new() -> Self {
         Self {
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
+            parent: AbstractCulture::new(),
         }
     }
 }
 
-/// 转换为字符串表示
-impl Display for SolarDate {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(
-            f,
-            "{}-{:02}-{:02} {:.0}:{:.0}:{:.0}",
-            self.year, self.month, self.day, self.hour, self.minute, self.second
-        )
+impl Into<AbstractCulture> for AbstractTyme {
+    fn into(self) -> AbstractCulture {
+        self.parent
     }
 }
 
-/// 节气信息
-#[derive(Debug, Clone, Copy)]
-pub struct JieQiInfo {
-    /// 节气的儒略日
-    pub julian_day: f64,
-    /// 节气索引
-    pub jq_index: u8,
+#[derive(Debug, Clone)]
+pub struct LoopTyme {
+    parent: AbstractTyme,
+    names: Vec<String>,
+    index: usize,
 }
 
-/// 农历日期结构
-#[derive(Debug, Clone, Copy)]
-pub struct LunarDate {
-    /// 年份（以1984年为基准的农历年）
-    pub year: i32,
-    /// 月份（1-12）
-    pub month: u8,
-    /// 日期（1-30）
-    pub day: u8,
-    /// 是否为闰月
-    pub is_leap_month: bool,
+impl Tyme for LoopTyme {
+    fn next(&self, _n: isize) -> Self {
+        unimplemented!()
+    }
 }
 
-impl LunarDate {
-    /// 创建新的农历日期实例
-    pub fn new(year: i32, month: u8, day: u8, is_leap_month: bool) -> Self {
+impl Culture for LoopTyme {
+    fn get_name(&self) -> String {
+        self.names[self.index].to_string()
+    }
+}
+
+impl LoopTyme {
+    pub fn new(names: Vec<String>, name: &str) -> Result<Self, String> {
+        let mut real_index: Option<usize> = None;
+        for i in 0..names.len() {
+            if names[i].to_string() == name {
+                real_index = Some(i);
+                break;
+            }
+        }
+        match real_index {
+            None => Err(format!("illegal name: {}", name)),
+            Some(n) => Ok(Self {
+                parent: AbstractTyme::new(),
+                names,
+                index: n,
+            }),
+        }
+    }
+
+    pub fn from_index(names: Vec<String>, index: isize) -> Self {
+        let size: usize = names.len();
+        let parent: AbstractTyme = AbstractTyme::new();
+        let culture: AbstractCulture = parent.into();
         Self {
-            year,
-            month,
-            day,
-            is_leap_month,
+            parent,
+            names,
+            index: culture.index_of(index, size),
         }
+    }
+
+    pub fn from_name(names: Vec<String>, name: &str) -> Self {
+        Self::new(names, name).unwrap()
+    }
+
+    pub fn get_index(&self) -> usize {
+        self.index
+    }
+
+    pub fn get_size(&self) -> usize {
+        self.names.len()
+    }
+
+    pub fn index_of_index(&self, index: isize) -> usize {
+        let culture: AbstractCulture = self.parent.into();
+        culture.index_of(index, self.get_size())
+    }
+
+    pub fn next_index(&self, n: isize) -> usize {
+        self.index_of_index(self.index as isize + n)
+    }
+
+    pub fn steps_to(&self, target_index: isize) -> usize {
+        self.index_of_index(target_index - self.index as isize)
     }
 }
 
-/// 转换为字符串表示
-impl Display for LunarDate {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        if self.is_leap_month {
-            write!(f, "{}-闰{:02}-{:02}", self.year, self.month, self.day)
-        } else {
-            write!(f, "{}-{:02}-{:02}", self.year, self.month, self.day)
-        }
+impl Into<AbstractTyme> for LoopTyme {
+    fn into(self) -> AbstractTyme {
+        self.parent
     }
 }

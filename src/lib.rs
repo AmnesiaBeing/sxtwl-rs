@@ -1,29 +1,19 @@
-//! sxtwl-rust - 农历计算库
-//! 提供公历/农历转换、节气、干支等功能
-
 #![no_std]
-// #![warn(missing_docs)]
-#![allow(clippy::approx_constant)]
 
 extern crate alloc;
+extern crate core;
 
-pub mod astronomy;
-pub mod consts;
-pub mod date;
-pub mod gz;
-pub mod julianday;
-pub mod lunar_phase_calculator;
+pub mod culture;
+pub mod eightchar;
+pub mod enums;
+pub mod festival;
+pub mod holiday;
+pub mod jd;
+pub mod lunar;
+pub mod rabbyung;
+pub mod sixtycycle;
+pub mod solar;
 pub mod sxtwl;
 pub mod types;
 
-// 自动生成的气朔修正表
-mod compressed_qishuo_correction_data;
-
-// 气朔修正参数表
-mod qishuo_fit_parameter;
-
-// 从各模块中重新导出公共API
-pub use crate::date::Day;
-pub use crate::gz::GanZhi;
-pub use crate::sxtwl::*;
-pub use crate::types::{JieQiInfo, JulianDay, LunarDate, SolarDate};
+mod generated_leap_year_data;
