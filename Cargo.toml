@@ -7,5 +7,8 @@ description = "农历/公历转换与传统历法计算库（支持no_std环境�
 repository = ""
 readme = "README.md"
 
+[build-dependencies]
+anyhow = "1.0"
+
 [dependencies]
 libm = "0.2.15"

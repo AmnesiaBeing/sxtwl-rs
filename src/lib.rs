@@ -16,4 +16,5 @@ pub mod solar;
 pub mod sxtwl;
 pub mod types;
 
+mod generated_holidays_data;
 mod generated_leap_year_data;
