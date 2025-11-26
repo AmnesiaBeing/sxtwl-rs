@@ -1,12 +1,9 @@
 mod coefficients;
 mod generated_compressed_qishuo_correction_data;
-mod consts;
-
-use alloc::vec::Vec;
 
 use crate::sxtwl::coefficients::DT_AT;
 use crate::sxtwl::coefficients::XL1;
-use crate::sxtwl::coefficients::{NUT_B, QI_KB, SHUO_KB, XL0};
+use crate::sxtwl::coefficients::{NUT_B, QI_KB, SHUO_KB, XL0_0, XL1_0};
 
 use crate::sxtwl::generated_compressed_qishuo_correction_data::{get_qi_value, get_shuo_value};
 
@@ -43,10 +40,10 @@ impl Sxtwl {
         let mut tn: f64 = 1.0;
         let mut m: usize;
         let pn: usize = 1;
-        let m0: f64 = XL0[pn + 1] - XL0[pn];
+        let m0: f64 = XL0_0[pn + 1] - XL0_0[pn];
         for i in 0..6 {
-            let n1: usize = XL0[pn + i] as usize;
-            let n2: usize = XL0[pn + 1 + i] as usize;
+            let n1: usize = XL0_0[pn + i] as usize;
+            let n2: usize = XL0_0[pn + 1 + i] as usize;
             let n0: f64 = (n2 - n1) as f64;
             if n0 == 0.0 {
                 continue;
@@ -65,13 +62,13 @@ impl Sxtwl {
             let mut c: f64 = 0.0;
             let mut j: usize = n1;
             while j < m {
-                c += XL0[j] * (XL0[j + 1] + t * XL0[j + 2]).cos();
+                c += XL0_0[j] * cos(XL0_0[j + 1] + t * XL0_0[j + 2]);
                 j += 3;
             }
             v += c * tn;
             tn *= t;
         }
-        v /= XL0[0];
+        v /= XL0_0[0];
         let t2: f64 = t * t;
         v += (-0.0728 - 2.7702 * t - 1.1019 * t2 - 0.0996 * t2 * t) / SECOND_PER_RAD;
         v
@@ -102,8 +99,8 @@ impl Sxtwl {
         if n < 0 {
             n = obl;
         }
-        for i in 0..XL1.len() {
-            let f: Vec<f64> = XL1[i].clone();
+        for i in 0..XL1_0.len() {
+            let f = XL1_0[i];
             let l: usize = f.len();
             let mut m: usize = (((n * (l as isize) / obl) as f64) + 0.5) as usize;
             if i > 0 {

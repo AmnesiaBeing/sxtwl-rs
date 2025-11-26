@@ -1,4 +1,5 @@
 use core::cell::RefCell;
+
 use core::fmt::{Display, Formatter};
 
 use alloc::format;
@@ -6,6 +7,7 @@ use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use libm::{ceil, floor};
 
+use crate::create_cache;
 use crate::culture::fetus::{FetusDay, FetusMonth};
 use crate::culture::ren::minor::MinorRen;
 use crate::culture::star::nine::NineStar;
@@ -16,9 +18,8 @@ use crate::culture::{
     Direction, Duty, Element, God, KitchenGodSteed, Phase, PhaseDay, Taboo, Twenty, Week,
 };
 use crate::eightchar::EightChar;
-use crate::eightchar::provider::{DefaultEightCharProvider, EightCharProvider};
+use crate::eightchar::provider::EIGHT_CHAR_PROVIDER;
 use crate::festival::LunarFestival;
-use crate::generated_leap_year_data::LEAP_MONTH_YEAR_DATA;
 use crate::jd::{J2000, JulianDay};
 use crate::sixtycycle::{
     EarthBranch, HeavenStem, SixtyCycle, SixtyCycleDay, SixtyCycleHour, ThreePillars,
@@ -26,6 +27,8 @@ use crate::sixtycycle::{
 use crate::solar::{SolarDay, SolarTerm, SolarTime};
 use crate::sxtwl::Sxtwl;
 use crate::types::{AbstractCulture, AbstractTyme, Culture, LoopTyme, Tyme};
+
+use crate::generated_leap_year_data::LEAP_MONTH_YEAR_DATA;
 
 /// 农历年
 #[derive(Debug, Copy, Clone)]
@@ -157,10 +160,9 @@ impl Eq for LunarYear {}
 #[rustfmt::skip]
 pub static LUNAR_MONTH_NAMES: [&str; 12] = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "腊月"];
 
-lazy_static! {
-  /// 农历月缓存
-  static ref LUNAR_MONTH_CACHE: Mutex<HashMap<String, Vec<f64>>> = Mutex::new(HashMap::new());
-}
+create_cache!(LUNAR_MONTH_CACHE, (isize, isize), f64, 32, 5);
+
+// static LUNAR_MONTH_CACHE: Mutex<LunarMonthCache> = Mutex::new(LunarMonthCache::new());
 
 /// 农历月
 #[derive(Debug, Copy, Clone)]
@@ -274,7 +276,7 @@ impl LunarMonth {
         })
     }
 
-    fn from_cache(cache: Vec<f64>) -> Self {
+    fn from_cache_data(cache: [f64; 5]) -> Self {
         let m: isize = cache[1] as isize;
         Self {
             year: LunarYear::from_year(cache[0] as isize),
@@ -287,24 +289,18 @@ impl LunarMonth {
     }
 
     pub fn from_ym(year: isize, month: isize) -> Self {
-        let instance: Self;
-        let key: String = format!("{}{}", year, month);
-        let mut map: MutexGuard<HashMap<String, Vec<f64>>> = LUNAR_MONTH_CACHE.lock().unwrap();
-        let vec: Option<&Vec<f64>> = map.get(&key);
-        match vec {
-            Some(v) => instance = Self::from_cache((*v).to_owned()),
-            None => {
-                instance = Self::new(year, month).unwrap();
-                let mut l: Vec<f64> = Vec::new();
-                l.push(instance.get_year() as f64);
-                l.push(instance.get_month_with_leap() as f64);
-                l.push(instance.get_day_count() as f64);
-                l.push(instance.get_index_in_year() as f64);
-                l.push(instance.get_first_julian_day().get_day());
-                map.insert(key, l);
-            }
-        }
-        instance
+        let data = LUNAR_MONTH_CACHE.get_or_compute((year, month), || {
+            let instance = Self::new(year, month).unwrap();
+            [
+                instance.get_year() as f64,
+                instance.get_month_with_leap() as f64,
+                instance.get_day_count() as f64,
+                instance.get_index_in_year() as f64,
+                instance.get_first_julian_day().get_day(),
+            ]
+        });
+
+        Self::from_cache_data(data)
     }
 
     pub fn get_lunar_year(&self) -> LunarYear {
@@ -1055,11 +1051,6 @@ impl PartialEq for LunarDay {
 
 impl Eq for LunarDay {}
 
-lazy_static! {
-    static ref EIGHT_CHAR_PROVIDER: Arc<Mutex<Box<dyn EightCharProvider + Sync + Send + 'static>>> =
-        Arc::new(Mutex::new(Box::new(DefaultEightCharProvider::new())));
-}
-
 /// 农历时辰
 #[derive(Debug, Clone)]
 pub struct LunarHour {
@@ -1273,10 +1264,7 @@ impl LunarHour {
     }
 
     pub fn get_eight_char(&self) -> EightChar {
-        EIGHT_CHAR_PROVIDER
-            .lock()
-            .unwrap()
-            .get_eight_char(self.clone())
+        EIGHT_CHAR_PROVIDER.get_eight_char(self.clone())
     }
 
     pub fn get_nine_star(&self) -> NineStar {

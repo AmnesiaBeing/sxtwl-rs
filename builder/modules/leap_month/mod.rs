@@ -5,29 +5,7 @@ use std::path::Path;
 use anyhow::Result;
 
 pub const LEAP_YEAR_HEADER: &str = r#"//! 此文件由 build.rs 自动生成，不要手动修改。
-//! 包含了预计算的闰月查找表数据。
-
-use core::option::Option;"#;
-
-pub const LEAP_MONTH_FUNCTIONS: &str = r#"/// 根据年份和月份获取累计值。
-/// 索引从 0 开始。
-/// 如果索引超出范围，返回 None。
-pub fn get_leap_month_value(month: usize, day: usize) -> Option<isize> {
-    if month >= LEAP_MONTH_YEAR_DATA.len() {
-        return None;
-    }
-    let month_data = LEAP_MONTH_YEAR_DATA[month];
-    if day >= month_data.len() {
-        return None;
-    }
-    Some(month_data[day])
-}
-
-/// 判断某一年的某个月是否为闰月（示例逻辑）。
-/// 如果 `get_leap_month_value` 返回 Some(_)，则认为是闰月。
-pub fn is_leap_month(month: usize) -> bool {
-    month < LEAP_MONTH_YEAR_DATA.len() && !LEAP_MONTH_YEAR_DATA[month].is_empty()
-}"#;
+//! 包含了预计算的闰月查找表数据"#;
 
 mod original_leap_month_strings;
 use original_leap_month_strings::{CHARS, LEAP_MONTH};
@@ -72,13 +50,13 @@ pub fn generate_leap_year_data() -> Result<()> {
     writeln!(f)?;
     writeln!(f, "/// 预计算的闰月数据，格式为 [月份][日期] -> 累计值")?;
     writeln!(f, "/// 注意：并非所有月份都有相同的天数。")?;
+    writeln!(f, "#[rustfmt::skip]").unwrap();
     writeln!(f, "pub static LEAP_MONTH_YEAR_DATA: &[&[isize]] = &[")?;
     for month_values in &leap_month_data {
         writeln!(f, "    &{:?},", month_values)?;
     }
     writeln!(f, "];")?;
     writeln!(f)?;
-    writeln!(f, "{}", LEAP_MONTH_FUNCTIONS)?;
 
     Ok(())
 }

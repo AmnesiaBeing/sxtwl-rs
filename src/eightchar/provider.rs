@@ -1,5 +1,8 @@
+use core::marker::PhantomData;
+
 use crate::eightchar::{ChildLimitInfo, EightChar};
 use crate::lunar::LunarHour;
+#[cfg(feature = "eight-char-lunar-sect2-provider")]
 use crate::sixtycycle::SixtyCycleHour;
 use crate::solar::{SolarMonth, SolarTerm, SolarTime};
 use crate::types::Tyme;
@@ -15,15 +18,18 @@ pub trait EightCharProvider {
 }
 
 /// 默认的八字计算（晚子时算第二天）
+#[cfg(feature = "eight-char-default-provider")]
 #[derive(Debug, Copy, Clone)]
 pub struct DefaultEightCharProvider {}
 
+#[cfg(feature = "eight-char-default-provider")]
 impl DefaultEightCharProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {}
     }
 }
 
+#[cfg(feature = "eight-char-default-provider")]
 impl EightCharProvider for DefaultEightCharProvider {
     fn get_eight_char(&self, hour: LunarHour) -> EightChar {
         hour.get_sixty_cycle_hour().get_eight_char()
@@ -31,15 +37,18 @@ impl EightCharProvider for DefaultEightCharProvider {
 }
 
 /// Lunar流派2的八字计算（晚子时日柱算当天）
+#[cfg(feature = "eight-char-lunar-sect2-provider")]
 #[derive(Debug, Copy, Clone)]
 pub struct LunarSect2EightCharProvider {}
 
+#[cfg(feature = "eight-char-lunar-sect2-provider")]
 impl LunarSect2EightCharProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {}
     }
 }
 
+#[cfg(feature = "eight-char-lunar-sect2-provider")]
 impl EightCharProvider for LunarSect2EightCharProvider {
     fn get_eight_char(&self, hour: LunarHour) -> EightChar {
         let h: SixtyCycleHour = hour.get_sixty_cycle_hour();
@@ -62,7 +71,7 @@ impl ChildLimitProvider for AbstractChildLimitProvider {
 }
 
 impl AbstractChildLimitProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {}
     }
 
@@ -112,20 +121,23 @@ impl AbstractChildLimitProvider {
     }
 }
 
-/// 默认的童限计算
+/// 默认的童限计算（3年4月5天6时7分）
+#[cfg(feature = "child-limit-default-provider")]
 #[derive(Debug, Copy, Clone)]
 pub struct DefaultChildLimitProvider {
     parent: AbstractChildLimitProvider,
 }
 
+#[cfg(feature = "child-limit-default-provider")]
 impl DefaultChildLimitProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             parent: AbstractChildLimitProvider::new(),
         }
     }
 }
 
+#[cfg(feature = "child-limit-default-provider")]
 impl ChildLimitProvider for DefaultChildLimitProvider {
     fn get_info(&self, birth_time: SolarTime, term: SolarTerm) -> ChildLimitInfo {
         // 出生时刻和节令时刻相差的秒数
@@ -154,20 +166,23 @@ impl ChildLimitProvider for DefaultChildLimitProvider {
     }
 }
 
-/// 元亨利贞的童限计算
+/// 元亨利贞的童限计算（3年4月5天6时7分）
+#[cfg(feature = "child-limit-china95-provider")]
 #[derive(Debug, Copy, Clone)]
 pub struct China95ChildLimitProvider {
     parent: AbstractChildLimitProvider,
 }
 
+#[cfg(feature = "child-limit-china95-provider")]
 impl China95ChildLimitProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             parent: AbstractChildLimitProvider::new(),
         }
     }
 }
 
+#[cfg(feature = "child-limit-china95-provider")]
 impl ChildLimitProvider for China95ChildLimitProvider {
     fn get_info(&self, birth_time: SolarTime, term: SolarTerm) -> ChildLimitInfo {
         // 出生时刻和节令时刻相差的分钟数
@@ -188,19 +203,22 @@ impl ChildLimitProvider for China95ChildLimitProvider {
 }
 
 /// Lunar的流派1童限计算（按天数和时辰数计算，3天1年，1天4个月，1时辰10天）
+#[cfg(feature = "child-limit-lunar-sect1-provider")]
 #[derive(Debug, Copy, Clone)]
 pub struct LunarSect1ChildLimitProvider {
     parent: AbstractChildLimitProvider,
 }
 
+#[cfg(feature = "child-limit-lunar-sect1-provider")]
 impl LunarSect1ChildLimitProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             parent: AbstractChildLimitProvider::new(),
         }
     }
 }
 
+#[cfg(feature = "child-limit-lunar-sect1-provider")]
 impl ChildLimitProvider for LunarSect1ChildLimitProvider {
     fn get_info(&self, birth_time: SolarTime, term: SolarTerm) -> ChildLimitInfo {
         let term_time: SolarTime = term.get_julian_day().get_solar_time();
@@ -246,20 +264,23 @@ impl ChildLimitProvider for LunarSect1ChildLimitProvider {
     }
 }
 
-/// Lunar的流派2童限计算（按分钟数计算）
+/// Lunar的流派2童限计算（按分钟数计算，3年4月5天6时7分）
+#[cfg(feature = "child-limit-lunar-sect2-provider")]
 #[derive(Debug, Copy, Clone)]
 pub struct LunarSect2ChildLimitProvider {
     parent: AbstractChildLimitProvider,
 }
 
+#[cfg(feature = "child-limit-lunar-sect2-provider")]
 impl LunarSect2ChildLimitProvider {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             parent: AbstractChildLimitProvider::new(),
         }
     }
 }
 
+#[cfg(feature = "child-limit-lunar-sect2-provider")]
 impl ChildLimitProvider for LunarSect2ChildLimitProvider {
     fn get_info(&self, birth_time: SolarTime, term: SolarTerm) -> ChildLimitInfo {
         // 出生时刻和节令时刻相差的分钟数
@@ -280,3 +301,69 @@ impl ChildLimitProvider for LunarSect2ChildLimitProvider {
         self.parent.next(birth_time, year, month, day, hour, 0, 0)
     }
 }
+
+// 八字服务
+pub struct EightCharService<P: EightCharProvider> {
+    provider: P,
+    _marker: PhantomData<P>,
+}
+
+impl<P: EightCharProvider> EightCharService<P> {
+    pub const fn new(provider: P) -> Self {
+        Self {
+            provider,
+            _marker: PhantomData,
+        }
+    }
+
+    /// 获取八字
+    pub fn get_eight_char(&self, lunar: LunarHour) -> EightChar {
+        self.provider.get_eight_char(lunar)
+    }
+}
+
+// 八字全局静态实例
+#[cfg(feature = "eight-char-default-provider")]
+pub static EIGHT_CHAR_PROVIDER: EightCharService<DefaultEightCharProvider> =
+    EightCharService::new(DefaultEightCharProvider::new());
+
+#[cfg(feature = "eight-char-lunar-sect2-provider")]
+pub static EIGHT_CHAR_PROVIDER: EightCharService<LunarSect2EightCharProvider> =
+    EightCharService::new(LunarSect2EightCharProvider::new());
+
+// 童限服务
+pub struct ChildLimitService<P: ChildLimitProvider> {
+    provider: P,
+    _marker: PhantomData<P>,
+}
+
+impl<P: ChildLimitProvider> ChildLimitService<P> {
+    pub const fn new(provider: P) -> Self {
+        Self {
+            provider,
+            _marker: PhantomData,
+        }
+    }
+
+    /// 获取童限
+    pub fn get_info(&self, birth_time: SolarTime, term: SolarTerm) -> ChildLimitInfo {
+        self.provider.get_info(birth_time, term)
+    }
+}
+
+// 童限全局静态实例
+#[cfg(feature = "child-limit-default-provider")]
+pub static CHILD_LIMIT_PROVIDER: ChildLimitService<DefaultChildLimitProvider> =
+    ChildLimitService::new(DefaultChildLimitProvider::new());
+
+#[cfg(feature = "child-limit-china95-provider")]
+pub static CHILD_LIMIT_PROVIDER: ChildLimitService<China95ChildLimitProvider> =
+    ChildLimitService::new(China95ChildLimitProvider::new());
+
+#[cfg(feature = "child-limit-lunar-sect1-provider")]
+pub static CHILD_LIMIT_PROVIDER: ChildLimitService<LunarSect1ChildLimitProvider> =
+    ChildLimitService::new(LunarSect1ChildLimitProvider::new());
+
+#[cfg(feature = "child-limit-lunar-sect2-provider")]
+pub static CHILD_LIMIT_PROVIDER: ChildLimitService<LunarSect2ChildLimitProvider> =
+    ChildLimitService::new(LunarSect2ChildLimitProvider::new());

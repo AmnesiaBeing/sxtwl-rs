@@ -1,12 +1,12 @@
 use core::fmt::{Display, Formatter};
 
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::{format, vec};
 use libm::ceil;
 
 use crate::culture::Duty;
-use crate::eightchar::provider::{ChildLimitProvider, DefaultChildLimitProvider};
+use crate::eightchar::provider::CHILD_LIMIT_PROVIDER;
 use crate::enums::{Gender, YinYang};
 use crate::lunar::LunarYear;
 use crate::sixtycycle::{EarthBranch, HeavenStem, SixtyCycle, SixtyCycleYear, ThreePillars};
@@ -310,11 +310,6 @@ impl PartialEq for ChildLimitInfo {
 
 impl Eq for ChildLimitInfo {}
 
-lazy_static! {
-    static ref CHILD_LIMIT_PROVIDER: Arc<Mutex<Box<dyn ChildLimitProvider + Sync + Send + 'static>>> =
-        Arc::new(Mutex::new(Box::new(DefaultChildLimitProvider::new())));
-}
-
 /// 童限（从出生到起运的时间段）
 #[derive(Debug, Clone)]
 pub struct ChildLimit {
@@ -338,10 +333,7 @@ impl ChildLimit {
         if forward {
             term = term.next(2);
         }
-        let info: ChildLimitInfo = CHILD_LIMIT_PROVIDER
-            .lock()
-            .unwrap()
-            .get_info(birth_time, term);
+        let info: ChildLimitInfo = CHILD_LIMIT_PROVIDER.get_info(birth_time, term);
 
         Self {
             eight_char,
@@ -642,26 +634,9 @@ impl Eq for Fortune {}
 
 #[cfg(test)]
 mod tests {
-    use crate::eightchar::provider::{ChildLimitProvider, DefaultChildLimitProvider};
-    use crate::eightchar::{CHILD_LIMIT_PROVIDER, ChildLimit};
-    use crate::enums::Gender;
+    use alloc::string::ToString;
+
     use crate::solar::SolarTime;
-
-    #[test]
-    fn test0() {
-        // 动态切换童限实现
-        {
-            let mut provider: MutexGuard<Box<dyn ChildLimitProvider + Sync + Send + 'static>> =
-                CHILD_LIMIT_PROVIDER.lock().unwrap();
-            *provider = Box::new(DefaultChildLimitProvider::new());
-        }
-
-        let d: ChildLimit = ChildLimit::from_solar_time(
-            SolarTime::from_ymd_hms(1989, 12, 31, 23, 7, 17),
-            Gender::MAN,
-        );
-        assert_eq!("1998年3月1日 19:47:17", d.get_end_time().to_string());
-    }
 
     #[test]
     fn test1() {

@@ -1,6 +1,7 @@
 use alloc::format;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use core::str::FromStr;
 use libm::{ceil, floor};
 
 use crate::culture::dog::{Dog, DogDay};

@@ -7,8 +7,21 @@ description = "农历/公历转换与传统历法计算库（支持no_std环境�
 repository = ""
 readme = "README.md"
 
+[features]
+default = ["eight-char", "child-limit"]        # 默认启用eight-char
+eight-char = ["eight-char-default-provider"]   # 启用eight-char时默认启用default-provider
+eight-char-default-provider = []               # eight-char默认提供器
+eight-char-lunar-sect2-provider = []           # eight-char农历分节提供器
+child-limit = ["child-limit-default-provider"] # 童限提供器
+child-limit-default-provider = []              # 童限默认提供器
+child-limit-china95-provider = []              # 童限中国95提供器
+child-limit-lunar-sect1-provider = []          # 童限农历分节1提供器
+child-limit-lunar-sect2-provider = []          # 童限农历分节2提供器
+
+
 [build-dependencies]
 anyhow = "1.0"
 
 [dependencies]
 libm = "0.2.15"
+spin = "0.10.0"

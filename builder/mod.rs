@@ -22,6 +22,14 @@ pub fn run() -> Result<()> {
     modules::holiday::generate_holidays_data()?;
     progress.complete_stage();
 
+    progress.start_stage("处理 RabByung 数据");
+    modules::rab_byung_month_days::generate_rab_byung_data()?;
+    progress.complete_stage();
+
+    progress.start_stage("处理 天狗 数据");
+    modules::day_dog::generate_day_dog_data()?;
+    progress.complete_stage();
+
     progress.finish_build();
     Ok(())
 }
