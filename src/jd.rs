@@ -130,14 +130,6 @@ impl JulianDay {
     }
 
     /// 儒略日相减
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::solar::SolarDay;
-    ///
-    /// let v: f64 = SolarDay::from_ymd(2023, 1, 10).get_julian_day().subtract(SolarDay::from_ymd(2023, 1, 1).get_julian_day());
-    /// ```
     pub fn subtract(&self, target: JulianDay) -> f64 {
         self.day - target.get_day()
     }

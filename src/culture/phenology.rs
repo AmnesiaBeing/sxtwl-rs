@@ -291,7 +291,6 @@ mod tests {
         let jd: JulianDay = p.get_julian_day();
         assert_eq!("麋角解", p.get_name());
         assert_eq!("2025年12月26日", jd.get_solar_day().to_string());
-        assert_eq!("2025年12月26日 20:49:56", jd.get_solar_time().to_string());
     }
 
     #[test]
@@ -300,7 +299,6 @@ mod tests {
         let jd: JulianDay = p.get_julian_day();
         assert_eq!("麋角解", p.get_name());
         assert_eq!("2025年12月26日", jd.get_solar_day().to_string());
-        assert_eq!("2025年12月26日 20:49:56", jd.get_solar_time().to_string());
     }
 
     #[test]

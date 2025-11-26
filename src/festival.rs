@@ -312,7 +312,7 @@ mod tests {
         let f: LunarFestival = LunarFestival::from_index(2023, 0).unwrap();
         assert_eq!("农历甲辰年正月初一 春节", f.next(13).unwrap().to_string());
         assert_eq!(
-            "农历壬寅年十一月廿九 冬至节",
+            "农历壬寅年冬月廿九 冬至节",
             f.next(-3).unwrap().to_string()
         );
     }
@@ -332,7 +332,7 @@ mod tests {
     #[test]
     fn test4() {
         let f: LunarFestival = LunarDay::from_ymd(2021, 12, 29).get_festival().unwrap();
-        assert_eq!("农历辛丑年十二月廿九 除夕", f.to_string());
+        assert_eq!("农历辛丑年腊月廿九 除夕", f.to_string());
     }
 
     #[test]

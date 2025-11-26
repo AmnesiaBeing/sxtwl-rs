@@ -45,8 +45,7 @@ impl Tyme for LunarYear {
 
 impl Culture for LunarYear {
     fn get_name(&self) -> String {
-        // self.get_sixty_cycle().get_name()
-        unimplemented!()
+        format!("农历{}年", self.get_sixty_cycle())
     }
 }
 
@@ -76,16 +75,6 @@ impl LunarYear {
     }
 
     /// 月数
-    ///
-    /// # 示例
-    ///
-    /// ```
-    ///
-    /// // 12
-    /// use tyme4rs::tyme::lunar::LunarYear;
-    ///
-    /// let month_count: usize = LunarYear::from_year(2008).get_month_count();
-    /// ```
     pub fn get_month_count(&self) -> usize {
         let mut n: usize = 12;
         if self.get_leap_month() > 0 {
@@ -727,57 +716,21 @@ impl LunarDay {
     }
 
     /// 农历月
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::lunar::{LunarDay, LunarMonth};
-    ///
-    /// // 正月
-    /// let lunar_month: LunarMonth = LunarDay::from_ymd(2023, 1, 1).get_lunar_month();
-    /// ```
     pub fn get_lunar_month(&self) -> LunarMonth {
         self.month
     }
 
     /// 年
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::lunar::LunarDay;
-    ///
-    /// // 2023
-    /// let y: isize = LunarDay::from_ymd(2023, 1, 1).get_year();
-    /// ```
     pub fn get_year(&self) -> isize {
         self.month.get_year()
     }
 
     /// 月
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::lunar::LunarDay;
-    ///
-    /// // 1
-    /// let m: isize = LunarDay::from_ymd(2023, 1, 1).get_month();
-    /// ```
     pub fn get_month(&self) -> isize {
         self.month.get_month_with_leap()
     }
 
     /// 日
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::lunar::LunarDay;
-    ///
-    /// // 1
-    /// let day: usize = LunarDay::from_ymd(2023, 1, 1).get_day();
-    /// ```
     pub fn get_day(&self) -> usize {
         self.day
     }
@@ -876,30 +829,11 @@ impl LunarDay {
     }
 
     /// 六曜
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::culture::star::six::SixStar;
-    /// use tyme4rs::tyme::lunar::LunarDay;
-    ///
-    /// let six_star: SixStar = LunarDay::from_ymd(2023, 1, 1).get_six_star();
-    /// ```
     pub fn get_six_star(&self) -> SixStar {
         SixStar::from_index((self.get_month() + self.day as isize - 2) % 6)
     }
 
     /// 公历日
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::lunar::LunarDay;
-    /// use tyme4rs::tyme::solar::SolarDay;
-    ///
-    /// // 农历日转公历日
-    /// let solar_day: SolarDay = LunarDay::from_ymd(2023, 1, 1).get_solar_day();
-    /// ```
     pub fn get_solar_day(&self) -> SolarDay {
         if self.solar_day.borrow().is_none() {
             let mut m = self.solar_day.borrow_mut();
@@ -941,15 +875,6 @@ impl LunarDay {
     }
 
     /// 农历传统节日
-    ///
-    /// # 示例
-    ///
-    /// ```
-    /// use tyme4rs::tyme::festival::LunarFestival;
-    /// use tyme4rs::tyme::lunar::LunarDay;
-    ///
-    /// let festival: Option<LunarFestival> = LunarDay::from_ymd(2024, 1, 1).get_festival();
-    /// ```
     pub fn get_festival(&self) -> Option<LunarFestival> {
         LunarFestival::from_ymd(self.get_year(), self.get_month(), self.day)
     }
@@ -1633,11 +1558,11 @@ mod tests {
 
         assert_eq!("己未", h.get_sixty_cycle_hour().get_day().get_name());
         assert_eq!("戊午", h.get_lunar_day().get_sixty_cycle().get_name());
-        assert_eq!("农历癸卯年十一月十四", h.get_lunar_day().to_string());
+        assert_eq!("农历癸卯年冬月十四", h.get_lunar_day().to_string());
 
         assert_eq!("甲子", h.get_sixty_cycle_hour().get_month().get_name());
         assert_eq!(
-            "农历癸卯年十一月",
+            "农历癸卯年冬月",
             h.get_lunar_day().get_lunar_month().to_string()
         );
         assert_eq!(
@@ -1673,11 +1598,11 @@ mod tests {
 
         assert_eq!("戊午", h.get_sixty_cycle_hour().get_day().get_name());
         assert_eq!("戊午", h.get_lunar_day().get_sixty_cycle().get_name());
-        assert_eq!("农历癸卯年十一月十四", h.get_lunar_day().to_string());
+        assert_eq!("农历癸卯年冬月十四", h.get_lunar_day().to_string());
 
         assert_eq!("甲子", h.get_sixty_cycle_hour().get_month().get_name());
         assert_eq!(
-            "农历癸卯年十一月",
+            "农历癸卯年冬月",
             h.get_lunar_day().get_lunar_month().to_string()
         );
         assert_eq!(
@@ -1800,18 +1725,18 @@ mod tests {
 
     #[test]
     fn test49() {
-        assert_eq!("闰十二月", LunarMonth::from_ym(37, -12).get_name());
+        assert_eq!("闰腊月", LunarMonth::from_ym(37, -12).get_name());
     }
 
     #[test]
     fn test50() {
-        assert_eq!("闰十二月", LunarMonth::from_ym(5552, -12).get_name());
+        assert_eq!("闰腊月", LunarMonth::from_ym(5552, -12).get_name());
     }
 
     #[test]
     fn test51() {
         assert_eq!(
-            "农历戊子年十二月",
+            "农历戊子年腊月",
             LunarMonth::from_ym(2008, 11).next(1).to_string()
         );
     }
@@ -1859,7 +1784,7 @@ mod tests {
     #[test]
     fn test57() {
         assert_eq!(
-            "农历戊子年十一月",
+            "农历戊子年冬月",
             LunarMonth::from_ym(2008, 12).next(-1).to_string()
         );
     }
@@ -1867,7 +1792,7 @@ mod tests {
     #[test]
     fn test58() {
         assert_eq!(
-            "农历戊子年十一月",
+            "农历戊子年冬月",
             LunarMonth::from_ym(2009, 1).next(-2).to_string()
         );
     }
@@ -1875,7 +1800,7 @@ mod tests {
     #[test]
     fn test59() {
         assert_eq!(
-            "农历戊子年十一月",
+            "农历戊子年冬月",
             LunarMonth::from_ym(2009, 5).next(-6).to_string()
         );
     }
@@ -1883,7 +1808,7 @@ mod tests {
     #[test]
     fn test60() {
         assert_eq!(
-            "农历戊子年十一月",
+            "农历戊子年冬月",
             LunarMonth::from_ym(2009, -5).next(-7).to_string()
         );
     }
@@ -1891,7 +1816,7 @@ mod tests {
     #[test]
     fn test61() {
         assert_eq!(
-            "农历戊子年十一月",
+            "农历戊子年冬月",
             LunarMonth::from_ym(2009, 6).next(-8).to_string()
         );
     }
@@ -1899,7 +1824,7 @@ mod tests {
     #[test]
     fn test62() {
         assert_eq!(
-            "农历戊子年十一月",
+            "农历戊子年冬月",
             LunarMonth::from_ym(2010, 1).next(-15).to_string()
         );
     }
@@ -1957,8 +1882,8 @@ mod tests {
     fn test70() {
         // 2023年闰2月
         let m: LunarMonth = LunarMonth::from_ym(2023, 12);
-        assert_eq!("农历癸卯年十二月", m.to_string());
-        assert_eq!("农历癸卯年十一月", m.next(-1).to_string());
+        assert_eq!("农历癸卯年腊月", m.to_string());
+        assert_eq!("农历癸卯年冬月", m.next(-1).to_string());
         assert_eq!("农历癸卯年十月", m.next(-2).to_string());
     }
 
@@ -1970,8 +1895,8 @@ mod tests {
         assert_eq!("农历癸卯年闰二月", m.next(-1).to_string());
         assert_eq!("农历癸卯年二月", m.next(-2).to_string());
         assert_eq!("农历癸卯年正月", m.next(-3).to_string());
-        assert_eq!("农历壬寅年十二月", m.next(-4).to_string());
-        assert_eq!("农历壬寅年十一月", m.next(-5).to_string());
+        assert_eq!("农历壬寅年腊月", m.next(-4).to_string());
+        assert_eq!("农历壬寅年冬月", m.next(-5).to_string());
     }
 
     #[test]
@@ -1998,7 +1923,7 @@ mod tests {
     #[test]
     fn test75() {
         let m: LunarMonth = LunarMonth::from_ym(2023, 11);
-        assert_eq!("农历癸卯年十一月", m.to_string());
+        assert_eq!("农历癸卯年冬月", m.to_string());
         assert_eq!("甲子", m.get_sixty_cycle().to_string());
     }
 
