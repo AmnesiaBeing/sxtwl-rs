@@ -25,3 +25,8 @@ anyhow = "1.0"
 [dependencies]
 libm = "0.2.15"
 spin = "0.10.0"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
