@@ -1,13 +1,18 @@
+#[cfg(feature = "dog")]
 pub mod dog;
+#[cfg(feature = "fetus")]
 pub mod fetus;
+#[cfg(feature = "nine")]
 pub mod nine;
+#[cfg(feature = "peng_zu")]
 pub mod peng_zu;
+#[cfg(feature = "phenology")]
 pub mod phenology;
+#[cfg(feature = "plumrain")]
 pub mod plumrain;
+#[cfg(feature = "miniren")]
 pub mod ren;
 pub mod star;
-
-mod generated_day_dog_data;
 
 use core::fmt::{Display, Formatter};
 
@@ -23,7 +28,10 @@ use crate::solar::{SolarDay, SolarTime};
 use crate::sxtwl::{ONE_THIRD, PI_2, Sxtwl};
 use crate::types::{AbstractCulture, AbstractCultureDay, AbstractTyme, Culture, LoopTyme, Tyme};
 
-use crate::culture::generated_day_dog_data::DAY_GODS_TABLE;
+#[cfg(feature = "god")]
+mod generated_day_god_data;
+#[cfg(feature = "god")]
+use crate::culture::generated_day_god_data::DAY_GODS_TABLE;
 
 pub static ANIMAL_NAMES: [&str; 28] = [
     "蛟", "龙", "貉", "兔", "狐", "虎", "豹", "獬", "牛", "蝠", "鼠", "燕", "猪", "獝", "狼", "狗",
@@ -503,27 +511,32 @@ impl Into<LoopTyme> for Element {
     }
 }
 
+#[cfg(feature = "god")]
 #[rustfmt::skip]
 pub static GOD_NAMES: [&str; 151] = ["天恩", "鸣吠", "母仓", "不将", "四相", "鸣吠对", "五合", "三合", "除神", "月德", "月空", "月德合", "月恩", "时阴", "五富", "生气", "金匮", "相日", "阴德", "六合", "益后", "青龙", "续世", "明堂", "王日", "要安", "官日", "吉期", "福德", "六仪", "金堂", "宝光", "民日", "临日", "天马", "敬安", "普护", "驿马", "天后", "阳德", "天喜", "天医", "司命", "圣心", "玉宇", "守日", "时德", "解神", "时阳", "天仓", "天巫", "玉堂", "福生", "天德", "天德合", "天愿", "天赦", "天符", "阴神", "解除", "五虚", "五离", "重日", "复日", "血支", "天贼", "土符", "游祸", "白虎", "小耗", "致死", "河魁", "劫煞", "月煞", "月建", "往亡", "大时", "大败", "咸池", "厌对", "招摇", "九坎", "九焦", "天罡", "死神", "月害", "死气", "月破", "大耗", "天牢", "元武", "月厌", "月虚", "归忌", "小时", "天刑", "朱雀", "九空", "天吏", "地火", "四击", "大煞", "勾陈", "八专", "灾煞", "天火", "血忌", "土府", "月刑", "触水龙", "地囊", "八风", "四废", "四忌", "四穷", "五墓", "阴错", "四耗", "阳错", "孤辰", "小会", "大会", "八龙", "七鸟", "九虎", "六蛇", "天狗", "行狠", "了戾", "岁薄", "逐阵", "三丧", "三阴", "阴道冲阳", "阴位", "阴阳交破", "阴阳俱错", "阴阳击冲", "鬼哭", "单阴", "绝阴", "纯阳", "阳错阴冲", "七符", "成日", "孤阳", "绝阳", "纯阴", "大退", "四离", "阳破阴冲"];
 
 /// 神煞
+#[cfg(feature = "god")]
 #[derive(Debug, Clone)]
 pub struct God {
     parent: LoopTyme,
 }
 
+#[cfg(feature = "god")]
 impl Tyme for God {
     fn next(&self, n: isize) -> Self {
         Self::from_index(self.parent.next_index(n) as isize)
     }
 }
 
+#[cfg(feature = "god")]
 impl Culture for God {
     fn get_name(&self) -> String {
         self.parent.get_name()
     }
 }
 
+#[cfg(feature = "god")]
 impl God {
     pub fn from_index(index: isize) -> Self {
         Self {
@@ -575,20 +588,21 @@ impl God {
     }
 }
 
+#[cfg(feature = "god")]
 impl Display for God {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.get_name())
     }
 }
 
+#[cfg(feature = "god")]
 impl PartialEq for God {
     fn eq(&self, other: &Self) -> bool {
         self.to_string() == other.to_string()
     }
 }
 
-impl Eq for God {}
-
+#[cfg(feature = "god")]
 impl Into<LoopTyme> for God {
     fn into(self) -> LoopTyme {
         self.parent
@@ -1778,10 +1792,13 @@ mod tests {
 
     use crate::alloc::string::ToString;
 
-    // use crate::culture::dog::DogDay;
     use crate::culture::{
-        Animal, Beast, Constellation, Direction, Duty, Element, God, Land, Luck, Taboo,
+        Animal, Beast, Constellation, Direction, Duty, Element, Land, Luck, Taboo,
     };
+
+    #[cfg(feature = "god")]
+    use crate::culture::God;
+
     use crate::sixtycycle::{EarthBranch, HeavenStem};
     use crate::solar::{SolarDay, SolarTime};
     use crate::types::Culture;
@@ -2113,6 +2130,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "god")]
     #[test]
     fn test39() {
         let mut ji: Vec<String> = Vec::new();

@@ -8,17 +8,28 @@ use alloc::vec::Vec;
 use libm::{ceil, floor};
 
 use crate::create_cache;
+#[cfg(feature = "god")]
+use crate::culture::God;
+#[cfg(feature = "fetus")]
 use crate::culture::fetus::{FetusDay, FetusMonth};
+#[cfg(feature = "miniren")]
 use crate::culture::ren::minor::MinorRen;
+#[cfg(feature = "star-nine")]
 use crate::culture::star::nine::NineStar;
+#[cfg(feature = "star-six")]
 use crate::culture::star::six::SixStar;
+#[cfg(feature = "star-twelve")]
 use crate::culture::star::twelve::TwelveStar;
+#[cfg(feature = "star-twenty-eight")]
 use crate::culture::star::twenty_eight::TwentyEightStar;
 use crate::culture::{
-    Direction, Duty, Element, God, KitchenGodSteed, Phase, PhaseDay, Taboo, Twenty, Week,
+    Direction, Duty, Element, KitchenGodSteed, Phase, PhaseDay, Taboo, Twenty, Week,
 };
+#[cfg(feature = "eight-char")]
 use crate::eightchar::EightChar;
+#[cfg(feature = "eight-char")]
 use crate::eightchar::provider::EIGHT_CHAR_PROVIDER;
+#[cfg(feature = "festival")]
 use crate::festival::LunarFestival;
 use crate::jd::{J2000, JulianDay};
 use crate::sixtycycle::{
@@ -120,6 +131,7 @@ impl LunarYear {
         )
     }
 
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         NineStar::from_index(
             63 + self.get_twenty().get_sixty().get_index() as isize * 3
@@ -389,6 +401,7 @@ impl LunarMonth {
     }
 
     /// 九星
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         let mut index: isize = self.get_sixty_cycle().get_earth_branch().get_index() as isize;
         if index < 2 {
@@ -401,11 +414,13 @@ impl LunarMonth {
     }
 
     /// 逐月胎神
+    #[cfg(feature = "fetus")]
     pub fn get_fetus(&self) -> Option<FetusMonth> {
         FetusMonth::from_lunar_month(*self)
     }
 
     /// 小六壬
+    #[cfg(feature = "miniren")]
     pub fn get_minor_ren(&self) -> MinorRen {
         MinorRen::from_index((self.month as isize - 1) % 6)
     }
@@ -829,6 +844,7 @@ impl LunarDay {
     }
 
     /// 六曜
+    #[cfg(feature = "star-six")]
     pub fn get_six_star(&self) -> SixStar {
         SixStar::from_index((self.get_month() + self.day as isize - 2) % 6)
     }
@@ -857,11 +873,13 @@ impl LunarDay {
     }
 
     /// 黄道黑道十二神
+    #[cfg(feature = "star-twelve")]
     pub fn get_twelve_star(&self) -> TwelveStar {
         self.get_sixty_cycle_day().get_twelve_star()
     }
 
     /// 二十八宿
+    #[cfg(feature = "star-twenty-eight")]
     pub fn get_twenty_eight_star(&self) -> TwentyEightStar {
         TwentyEightStar::from_index(
             [10, 18, 26, 6, 14, 22, 2][self.get_solar_day().get_week().get_index()],
@@ -870,16 +888,19 @@ impl LunarDay {
     }
 
     /// 逐日胎神
+    #[cfg(feature = "fetus")]
     pub fn get_fetus_day(&self) -> FetusDay {
         FetusDay::from_lunar_day(self.clone())
     }
 
     /// 农历传统节日
+    #[cfg(feature = "festival")]
     pub fn get_festival(&self) -> Option<LunarFestival> {
         LunarFestival::from_ymd(self.get_year(), self.get_month(), self.day)
     }
 
     /// 九星
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         let solar: SolarDay = self.get_solar_day();
         let dong_zhi: SolarTerm = SolarTerm::from_index(solar.get_year(), 0);
@@ -933,6 +954,7 @@ impl LunarDay {
         l
     }
 
+    #[cfg(feature = "god")]
     pub fn get_gods(&self) -> Vec<God> {
         self.get_sixty_cycle_day().get_gods()
     }
@@ -948,6 +970,7 @@ impl LunarDay {
     }
 
     /// 小六壬
+    #[cfg(feature = "miniren")]
     pub fn get_minor_ren(&self) -> MinorRen {
         self.get_lunar_month()
             .get_minor_ren()
@@ -1188,10 +1211,12 @@ impl LunarHour {
         self.sixty_cycle_hour.borrow().clone().unwrap()
     }
 
+    #[cfg(feature = "eight-char")]
     pub fn get_eight_char(&self) -> EightChar {
         EIGHT_CHAR_PROVIDER.get_eight_char(self.clone())
     }
 
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         let solar: SolarDay = self.day.get_solar_day();
         let dong_zhi: SolarTerm = SolarTerm::from_index(solar.get_year(), 0);
@@ -1207,6 +1232,7 @@ impl LunarHour {
         NineStar::from_index(index)
     }
 
+    #[cfg(feature = "star-twelve")]
     pub fn get_twelve_star(&self) -> TwelveStar {
         TwelveStar::from_index(
             self.get_sixty_cycle().get_earth_branch().get_index() as isize
@@ -1235,6 +1261,7 @@ impl LunarHour {
     }
 
     /// 小六壬
+    #[cfg(feature = "miniren")]
     pub fn get_minor_ren(&self) -> MinorRen {
         self.get_lunar_day()
             .get_minor_ren()
@@ -1268,6 +1295,7 @@ impl Eq for LunarHour {}
 mod tests {
     use alloc::string::ToString;
 
+    #[cfg(feature = "star-twenty-eight")]
     use crate::culture::star::twenty_eight::TwentyEightStar;
     use crate::lunar::{LunarDay, LunarHour, LunarMonth, LunarYear};
     use crate::solar::SolarDay;
@@ -1467,6 +1495,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "star-twenty-eight")]
     #[test]
     fn test24() {
         let d: LunarDay = LunarDay::from_ymd(2020, 4, 13);
@@ -1481,6 +1510,7 @@ mod tests {
         assert_eq!("东南", star.get_land().get_direction().get_name());
     }
 
+    #[cfg(feature = "star-twenty-eight")]
     #[test]
     fn test25() {
         let d: LunarDay = LunarDay::from_ymd(2023, 9, 28);

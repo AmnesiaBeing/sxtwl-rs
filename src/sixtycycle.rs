@@ -5,14 +5,23 @@ use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use libm::{ceil, floor};
 
+#[cfg(feature = "god")]
+use crate::culture::God;
+#[cfg(feature = "fetus")]
 use crate::culture::fetus::FetusDay;
+#[cfg(feature = "star-nine")]
 use crate::culture::star::nine::NineStar;
+#[cfg(feature = "star-ten")]
 use crate::culture::star::ten::TenStar;
+#[cfg(feature = "star-twelve")]
 use crate::culture::star::twelve::TwelveStar;
+#[cfg(feature = "star-twenty-eight")]
 use crate::culture::star::twenty_eight::TwentyEightStar;
-use crate::culture::{Direction, Duty, Element, God, Sound, Taboo, Ten, Terrain, Twenty, Zodiac};
+use crate::culture::{Direction, Duty, Element, Sound, Taboo, Ten, Terrain, Twenty, Zodiac};
+#[cfg(feature = "eight-char")]
 use crate::eightchar::EightChar;
-use crate::enums::{HideHeavenStemType, YinYang};
+use crate::enums::HideHeavenStemType;
+use crate::enums::YinYang;
 use crate::lunar::{LunarDay, LunarHour, LunarMonth, LunarYear};
 use crate::solar::{SolarDay, SolarTerm, SolarTime};
 use crate::types::{AbstractCulture, AbstractCultureDay, Culture, LoopTyme, Tyme};
@@ -126,6 +135,7 @@ impl HeavenStem {
     }
 
     /// 十神（生我者，正印偏印。我生者，伤官食神。克我者，正官七杀。我克者，正财偏财。同我者，劫财比肩。）
+    #[cfg(feature = "star-ten")]
     pub fn get_ten_star(&self, target: Self) -> TenStar {
         let target_index: isize = target.get_index() as isize;
         let index: isize = self.get_index() as isize;
@@ -666,6 +676,7 @@ impl SixtyCycleYear {
         )
     }
 
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         NineStar::from_index(
             63 + self.get_twenty().get_sixty().get_index() as isize * 3
@@ -766,6 +777,7 @@ impl SixtyCycleMonth {
     }
 
     /// 九星
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         let mut index: isize = self.month.get_earth_branch().get_index() as isize;
         if index < 2 {
@@ -889,6 +901,7 @@ impl SixtyCycleDay {
     }
 
     /// 黄道黑道十二神
+    #[cfg(feature = "star-twelve")]
     pub fn get_twelve_star(&self) -> TwelveStar {
         TwelveStar::from_index(
             self.day.get_earth_branch().get_index() as isize
@@ -897,6 +910,7 @@ impl SixtyCycleDay {
     }
 
     /// 二十八宿
+    #[cfg(feature = "star-twenty-eight")]
     pub fn get_twenty_eight_star(&self) -> TwentyEightStar {
         TwentyEightStar::from_index(
             [10, 18, 26, 6, 14, 22, 2][self.solar_day.get_week().get_index()],
@@ -905,11 +919,13 @@ impl SixtyCycleDay {
     }
 
     /// 逐日胎神
+    #[cfg(feature = "fetus")]
     pub fn get_fetus_day(&self) -> FetusDay {
         FetusDay::from_sixty_cycle_day(self.clone())
     }
 
     /// 九星
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         let d: SolarDay = self.solar_day;
         let dong_zhi: SolarTerm = SolarTerm::from_index(d.get_year(), 0);
@@ -966,6 +982,7 @@ impl SixtyCycleDay {
         l
     }
 
+    #[cfg(feature = "god")]
     pub fn get_gods(&self) -> Vec<God> {
         God::get_day_gods(self.get_month(), self.get_sixty_cycle())
     }
@@ -1104,6 +1121,7 @@ impl SixtyCycleHour {
         (h + 1) / 2
     }
 
+    #[cfg(feature = "eight-char")]
     pub fn get_eight_char(&self) -> EightChar {
         EightChar::from_sixty_cycle(
             self.get_year(),
@@ -1113,6 +1131,7 @@ impl SixtyCycleHour {
         )
     }
 
+    #[cfg(feature = "star-nine")]
     pub fn get_nine_star(&self) -> NineStar {
         let solar: SolarDay = self.solar_time.get_solar_day();
         let dong_zhi: SolarTerm = SolarTerm::from_index(solar.get_year(), 0);
@@ -1128,6 +1147,7 @@ impl SixtyCycleHour {
         NineStar::from_index(index)
     }
 
+    #[cfg(feature = "star-twelve")]
     pub fn get_twelve_star(&self) -> TwelveStar {
         TwelveStar::from_index(
             self.hour.get_earth_branch().get_index() as isize
@@ -1292,6 +1312,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "star-ten")]
     #[test]
     fn test6() {
         assert_eq!(

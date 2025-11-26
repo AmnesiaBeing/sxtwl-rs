@@ -8,16 +8,44 @@ repository = ""
 readme = "README.md"
 
 [features]
-default = ["eight-char", "child-limit"]        # 默认启用eight-char
-eight-char = ["eight-char-default-provider"]   # 启用eight-char时默认启用default-provider
-eight-char-default-provider = []               # eight-char默认提供器
-eight-char-lunar-sect2-provider = []           # eight-char农历分节提供器
+default = []
+
+eight-char = ["eight-char-default-provider", "child-limit"]
+eight-char-default-provider = []                            # eight-char默认提供器
+eight-char-lunar-sect2-provider = []                        # eight-char农历分节提供器
+
 child-limit = ["child-limit-default-provider"] # 童限提供器
 child-limit-default-provider = []              # 童限默认提供器
 child-limit-china95-provider = []              # 童限中国95提供器
 child-limit-lunar-sect1-provider = []          # 童限农历分节1提供器
 child-limit-lunar-sect2-provider = []          # 童限农历分节2提供器
 
+festival = [] # 节假日（固定的，单一的公历、农历节日）
+holiday = []  # 节假日（法定假日、调休等）
+
+rabbyung = [] # 藏历
+
+dog = [] # 三伏
+god = [] # 神煞
+
+peng_zu = [] # 彭祖百忌
+
+phenology = [] # 物候
+
+fetus = [] # 胎日
+
+nine = [] # 数九
+
+plumrain = [] #  梅雨
+
+miniren = [] # 小六壬
+
+star-nine = []         # 北斗九星
+star-seven = []        # 七曜
+star-six = []          # 六曜
+star-ten = []          # 十神
+star-twelve = []       # 黄道黑道十二神
+star-twenty-eight = [] # 二十八宿
 
 [build-dependencies]
 anyhow = "1.0"

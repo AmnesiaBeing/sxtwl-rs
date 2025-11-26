@@ -18,17 +18,26 @@ pub fn run() -> Result<()> {
     modules::leap_month::generate_leap_year_data()?;
     progress.complete_stage();
 
-    progress.start_stage("处理 法定节假日 数据");
-    modules::holiday::generate_holidays_data()?;
-    progress.complete_stage();
+    #[cfg(feature = "holiday")]
+    {
+        progress.start_stage("处理 法定节假日 数据");
+        modules::holiday::generate_holidays_data()?;
+        progress.complete_stage();
+    }
 
-    progress.start_stage("处理 RabByung 数据");
-    modules::rab_byung_month_days::generate_rab_byung_data()?;
-    progress.complete_stage();
+    #[cfg(feature = "rabbyung")]
+    {
+        progress.start_stage("处理 RabByung 数据");
+        modules::rab_byung_month_days::generate_rab_byung_data()?;
+        progress.complete_stage();
+    }
 
-    progress.start_stage("处理 天狗 数据");
-    modules::day_dog::generate_day_dog_data()?;
-    progress.complete_stage();
+    #[cfg(feature = "day-god")]
+    {
+        progress.start_stage("处理 神煞 数据");
+        modules::day_god::generate_day_god_data()?;
+        progress.complete_stage();
+    }
 
     progress.finish_build();
     Ok(())

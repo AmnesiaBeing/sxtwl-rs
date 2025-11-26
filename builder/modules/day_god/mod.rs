@@ -4,19 +4,19 @@ use std::path::Path;
 
 use anyhow::Result;
 
-pub const DAY_DOG_HEADER: &str = r#"//! 此文件由 build.rs 自动生成，不要手动修改。
+pub const DAY_GOD_HEADER: &str = r#"//! 此文件由 build.rs 自动生成，不要手动修改。
 "#;
 
 mod original_strings;
 use original_strings::DAY_GODS;
 
-pub fn generate_day_dog_data() -> Result<()> {
+pub fn generate_day_god_data() -> Result<()> {
     let dest_path = Path::new("src")
         .join("culture")
-        .join("generated_day_dog_data.rs");
+        .join("generated_day_god_data.rs");
     let mut f = File::create(&dest_path).unwrap();
 
-    writeln!(f, "{}", DAY_DOG_HEADER)?;
+    writeln!(f, "{}", DAY_GOD_HEADER)?;
 
     writeln!(f, "// 自动生成的 Day Gods 数据").unwrap();
 

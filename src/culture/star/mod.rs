@@ -1,6 +1,12 @@
+#[cfg(feature = "star-seven")]
 pub mod seven;
+#[cfg(feature = "star-six")]
 pub mod six;
+#[cfg(feature = "star-ten")]
 pub mod ten;
+#[cfg(feature = "star-twenty-eight")]
 pub mod twenty_eight;
+#[cfg(feature = "star-nine")]
 pub mod nine;
+#[cfg(feature = "star-twelve")]
 pub mod twelve;

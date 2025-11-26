@@ -4,16 +4,23 @@ use alloc::vec::Vec;
 use core::str::FromStr;
 use libm::{ceil, floor};
 
+#[cfg(feature = "dog")]
 use crate::culture::dog::{Dog, DogDay};
+#[cfg(feature = "nine")]
 use crate::culture::nine::{Nine, NineDay};
+#[cfg(feature = "phenology")]
 use crate::culture::phenology::{Phenology, PhenologyDay};
+#[cfg(feature = "plumrain")]
 use crate::culture::plumrain::{PlumRain, PlumRainDay};
 use crate::culture::{Constellation, Phase, PhaseDay, Week};
 use crate::enums::HideHeavenStemType;
+#[cfg(feature = "festival")]
 use crate::festival::SolarFestival;
+#[cfg(feature = "holiday")]
 use crate::holiday::LegalHoliday;
 use crate::jd::{J2000, JulianDay};
 use crate::lunar::{LunarDay, LunarHour, LunarMonth};
+#[cfg(feature = "rabbyung")]
 use crate::rabbyung::{RabByungDay, RabByungYear};
 use crate::sixtycycle::{HideHeavenStem, HideHeavenStemDay, SixtyCycleDay, SixtyCycleHour};
 use crate::sxtwl::Sxtwl;
@@ -103,6 +110,7 @@ impl SolarYear {
     }
 
     /// 藏历年
+    #[cfg(feature = "rabbyung")]
     pub fn get_rab_byung_year(&self) -> Result<RabByungYear, String> {
         RabByungYear::from_year(self.year)
     }
@@ -810,6 +818,7 @@ impl SolarDay {
     }
 
     /// 三伏天
+    #[cfg(feature = "dog")]
     pub fn get_dog_day(&self) -> Option<DogDay> {
         let xia_zhi: SolarTerm = SolarTerm::from_index(self.get_year(), 12);
         // 第1个庚日
@@ -853,6 +862,7 @@ impl SolarDay {
     }
 
     /// 数九天
+    #[cfg(feature = "nine")]
     pub fn get_nine_day(&self) -> Option<NineDay> {
         let year: isize = self.get_year();
         let mut start: SolarDay = SolarTerm::from_index(year + 1, 0).get_solar_day();
@@ -868,6 +878,7 @@ impl SolarDay {
     }
 
     /// 七十二候
+    #[cfg(feature = "phenology")]
     pub fn get_phenology_day(&self) -> PhenologyDay {
         let d: SolarTermDay = self.get_term_day();
         let day_index: isize = d.get_day_index() as isize;
@@ -883,6 +894,7 @@ impl SolarDay {
     }
 
     /// 候
+    #[cfg(feature = "phenology")]
     pub fn get_phenology(&self) -> Phenology {
         self.get_phenology_day().get_phenology()
     }
@@ -925,6 +937,7 @@ impl SolarDay {
         )
     }
 
+    #[cfg(feature = "plumrain")]
     pub fn get_plum_rain_day(&self) -> Option<PlumRainDay> {
         // 芒种
         let grain_in_ear: SolarTerm = SolarTerm::from_index(self.get_year(), 11);
@@ -958,11 +971,13 @@ impl SolarDay {
     }
 
     /// 法定假日
+    #[cfg(feature = "holiday")]
     pub fn get_legal_holiday(&self) -> Option<LegalHoliday> {
         LegalHoliday::from_ymd(self.get_year(), self.get_month(), self.day)
     }
 
     /// 公历现代节日
+    #[cfg(feature = "festival")]
     pub fn get_festival(&self) -> Option<SolarFestival> {
         SolarFestival::from_ymd(self.get_year(), self.get_month(), self.day)
     }
@@ -972,6 +987,8 @@ impl SolarDay {
         SixtyCycleDay::from_solar_day(*self)
     }
 
+    /// 藏历日
+    #[cfg(feature = "rabbyung")]
     pub fn get_rab_byung_day(&self) -> Result<RabByungDay, String> {
         RabByungDay::from_solar_day(*self)
     }
@@ -1173,6 +1190,7 @@ impl SolarTime {
     }
 
     /// 候
+    #[cfg(feature = "phenology")]
     pub fn get_phenology(&self) -> Phenology {
         let mut p: Phenology = self.day.get_phenology();
         if self.is_before(p.get_julian_day().get_solar_time()) {
@@ -1575,6 +1593,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "phenology")]
     #[test]
     fn test10() {
         assert_eq!(
@@ -1585,6 +1604,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "phenology")]
     #[test]
     fn test11() {
         assert_eq!(
