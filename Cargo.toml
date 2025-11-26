@@ -2,7 +2,7 @@
 name = "sxtwl-rs"
 version = "0.1.0"
 edition = "2024"
-license = "BSD-3-Clause"
+license = "MIT"
 description = "农历/公历转换与传统历法计算库（支持no_std环境）"
 repository = ""
 readme = "README.md"
