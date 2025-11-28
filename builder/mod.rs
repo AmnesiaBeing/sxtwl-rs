@@ -32,7 +32,7 @@ pub fn run() -> Result<()> {
         progress.complete_stage();
     }
 
-    #[cfg(feature = "day-god")]
+    #[cfg(feature = "god")]
     {
         progress.start_stage("处理 神煞 数据");
         modules::day_god::generate_day_god_data()?;

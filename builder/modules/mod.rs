@@ -1,3 +1,4 @@
+#[cfg(feature = "god")]
 pub mod day_god;
 #[cfg(feature = "holiday")]
 pub mod holiday;
