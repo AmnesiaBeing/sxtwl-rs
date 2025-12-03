@@ -163,8 +163,6 @@ pub static LUNAR_MONTH_NAMES: [&str; 12] = ["正月", "二月", "三月", "四�
 
 create_cache!(LUNAR_MONTH_CACHE, (isize, isize), f64, 32, 5);
 
-// static LUNAR_MONTH_CACHE: Mutex<LunarMonthCache> = Mutex::new(LunarMonthCache::new());
-
 /// 农历月
 #[derive(Debug, Copy, Clone)]
 pub struct LunarMonth {
