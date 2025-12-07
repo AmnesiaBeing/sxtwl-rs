@@ -426,7 +426,7 @@ impl LunarMonth {
 
 impl Display for LunarMonth {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}{}", self.year.to_string(), self.get_name())
+        write!(f, "{}", self.get_name())
     }
 }
 
