@@ -20,18 +20,14 @@ pub struct LegalHolidayEntry {
 }"#;
 
 pub fn generate_holidays_data() -> Result<()> {
-    let dest_path = Path::new("src").join("generated_holidays_data.rs");
-    let mut f = File::create(&dest_path).unwrap();
-
-    writeln!(f, "{}", HOLIDAYS_HEADER)?;
-    writeln!(f)?;
+    // 生成 Rust 代码
+    let mut content = format!("{}\n\n", HOLIDAYS_HEADER);
 
     let record_count = LEGAL_HOLIDAY_DATA.len() / 13;
-    writeln!(
-        f,
-        "pub const LEGAL_HOLIDAY_TABLE: [LegalHolidayEntry; {}] = [",
+    content.push_str(&format!(
+        "pub const LEGAL_HOLIDAY_TABLE: [LegalHolidayEntry; {}] = [\n",
         record_count
-    )?;
+    ));
 
     for i in 0..record_count {
         let start = i * 13;
@@ -46,13 +42,19 @@ pub fn generate_holidays_data() -> Result<()> {
         let work = work_char == "0";
         let index = index_char.parse::<u8>().unwrap();
 
-        writeln!(
-            f,
-            "    LegalHolidayEntry {{ year: {}, month: {}, day: {}, work: {}, index: {} }},",
+        content.push_str(&format!(
+            "    LegalHolidayEntry {{ year: {}, month: {}, day: {}, work: {}, index: {} }},\n",
             year, month, day, work, index
-        )?;
+        ));
     }
 
-    writeln!(f, "];")?;
+    content.push_str("];\n");
+
+    let dest_path = Path::new("src").join("generated_holidays_data.rs");
+
+    // 写入文件
+    let mut f = File::create(&dest_path).unwrap();
+    writeln!(f, "{}", content)?;
+
     Ok(())
 }

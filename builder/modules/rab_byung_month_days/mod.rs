@@ -28,13 +28,10 @@ mod original_strings;
 use original_strings::RAW_DATA;
 
 pub fn generate_rab_byung_data() -> Result<()> {
-    let dest_path = Path::new("src").join("generated_rab_byung.rs");
-    let mut f = File::create(&dest_path).unwrap();
-
-    writeln!(f, "{}", RAB_BYUNG_MONTH_DAYS_HEADER)?;
-
-    writeln!(f, "#[rustfmt::skip]").unwrap();
-    writeln!(f, "pub static RAB_BYUNG_DATA: &[RabByungMonthData] = &[").unwrap();
+    // 生成 Rust 代码
+    let mut content = format!("{}\n", RAB_BYUNG_MONTH_DAYS_HEADER);
+    content.push_str("#[rustfmt::skip]\n");
+    content.push_str("pub static RAB_BYUNG_DATA: &[RabByungMonthData] = &[\n");
 
     let years: Vec<&str> = RAW_DATA.split(',').collect();
     let mut y: usize = 1950;
@@ -56,8 +53,10 @@ pub fn generate_rab_byung_data() -> Result<()> {
             }
 
             // 生成静态数组条目
-            #[rustfmt::skip]
-            writeln!(f, "    RabByungMonthData {{ year: {}, month: {}, days: &{:?} }},", y, m, days_array).unwrap();
+            content.push_str(&format!(
+                "    RabByungMonthData {{ year: {}, month: {}, days: &{:?} }},\n",
+                y, m, days_array
+            ));
 
             // 更新位置
             m += 1;
@@ -67,9 +66,14 @@ pub fn generate_rab_byung_data() -> Result<()> {
         m = 0;
     }
 
-    writeln!(f, "];").unwrap();
+    content.push_str("];\n");
+    content.push_str(RAB_BYUNG_MONTH_DAYS_FUNCTIONS);
 
-    writeln!(f, "{}", RAB_BYUNG_MONTH_DAYS_FUNCTIONS)?;
+    let dest_path = Path::new("src").join("generated_rab_byung.rs");
+
+    // 写入文件
+    let mut f = File::create(&dest_path).unwrap();
+    writeln!(f, "{}", content)?;
 
     Ok(())
 }

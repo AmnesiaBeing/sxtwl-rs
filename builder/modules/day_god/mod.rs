@@ -11,24 +11,14 @@ mod original_strings;
 use original_strings::DAY_GODS;
 
 pub fn generate_day_god_data() -> Result<()> {
-    let dest_path = Path::new("src")
-        .join("culture")
-        .join("generated_day_god_data.rs");
-    let mut f = File::create(&dest_path).unwrap();
-
-    writeln!(f, "{}", DAY_GOD_HEADER)?;
-
-    writeln!(f, "// 自动生成的 Day Gods 数据").unwrap();
-
-    writeln!(f, "#[rustfmt::skip]").unwrap();
-    writeln!(
-        f,
-        "pub static DAY_GODS_TABLE: [[Option<&[u8]>; 60]; 12] = ["
-    )
-    .unwrap();
+    // 生成 Rust 代码
+    let mut content = format!("{}\n", DAY_GOD_HEADER);
+    content.push_str("// 自动生成的 Day Gods 数据\n");
+    content.push_str("#[rustfmt::skip]\n");
+    content.push_str("pub static DAY_GODS_TABLE: [[Option<&[u8]>; 60]; 12] = [\n");
 
     for month_data in DAY_GODS.iter() {
-        writeln!(f, "    [").unwrap();
+        content.push_str("    [\n");
 
         let mut day_entries: [Option<&'static [u8]>; 60] = [None; 60];
 
@@ -53,7 +43,7 @@ pub fn generate_day_god_data() -> Result<()> {
                             .collect();
 
                         if !data_vec.is_empty() {
-                            writeln!(f, "        Some(&{:?}),", data_vec).unwrap();
+                            content.push_str(&format!("        Some(&{:?}),\n", data_vec));
                             day_entries[day_index as usize] =
                                 Some(Box::leak(data_vec.into_boxed_slice()));
                         }
@@ -65,14 +55,22 @@ pub fn generate_day_god_data() -> Result<()> {
         // 对于没有数据的天，写入 None
         for day_idx in 0..60 {
             if day_entries[day_idx].is_none() {
-                writeln!(f, "        None, // 天 {}", day_idx).unwrap();
+                content.push_str(&format!("        None, // 天 {}\n", day_idx));
             }
         }
 
-        writeln!(f, "    ],").unwrap();
+        content.push_str("    ],\n");
     }
-    
-    writeln!(f, "];").unwrap();
+
+    content.push_str("];\n");
+
+    let dest_path = Path::new("src")
+        .join("culture")
+        .join("generated_day_god_data.rs");
+
+    // 写入文件
+    let mut f = File::create(&dest_path).unwrap();
+    writeln!(f, "{}", content)?;
 
     Ok(())
 }

@@ -43,20 +43,22 @@ pub fn generate_leap_year_data() -> Result<()> {
         leap_month_data.push(month_values);
     }
 
-    let dest_path = Path::new("src").join("generated_leap_year_data.rs");
-    let mut f = File::create(&dest_path).unwrap();
-
-    writeln!(f, "{}", LEAP_YEAR_HEADER)?;
-    writeln!(f)?;
-    writeln!(f, "/// 预计算的闰月数据，格式为 [月份][日期] -> 累计值")?;
-    writeln!(f, "/// 注意：并非所有月份都有相同的天数。")?;
-    writeln!(f, "#[rustfmt::skip]").unwrap();
-    writeln!(f, "pub static LEAP_MONTH_YEAR_DATA: &[&[isize]] = &[")?;
+    // 生成 Rust 代码
+    let mut content = format!("{}\n\n", LEAP_YEAR_HEADER);
+    content.push_str("/// 预计算的闰月数据，格式为 [月份][日期] -> 累计值\n");
+    content.push_str("/// 注意：并非所有月份都有相同的天数。\n");
+    content.push_str("#[rustfmt::skip]\n");
+    content.push_str("pub static LEAP_MONTH_YEAR_DATA: &[&[isize]] = &[\n");
     for month_values in &leap_month_data {
-        writeln!(f, "    &{:?},", month_values)?;
+        content.push_str(&format!("    &{:?},\n", month_values));
     }
-    writeln!(f, "];")?;
-    writeln!(f)?;
+    content.push_str("];\n");
+
+    let dest_path = Path::new("src").join("generated_leap_year_data.rs");
+
+    // 写入文件
+    let mut f = File::create(&dest_path).unwrap();
+    writeln!(f, "{}", content)?;
 
     Ok(())
 }

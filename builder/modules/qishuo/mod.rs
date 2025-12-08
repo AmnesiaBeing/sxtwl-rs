@@ -118,11 +118,6 @@ fn string_to_two_bits(s: &str) -> (Vec<u8>, usize) {
 }
 
 pub fn generate_qishuo_data() -> Result<()> {
-    let dest_path = Path::new("src")
-        .join("sxtwl")
-        .join("generated_compressed_qishuo_correction_data.rs");
-    let mut f = File::create(&dest_path).unwrap();
-
     // 处理朔日表
     let shuo_decompressed = jieya(SHUO_S);
     let (shuo_bytes, shuo_len) = string_to_two_bits(&shuo_decompressed);
@@ -132,15 +127,18 @@ pub fn generate_qishuo_data() -> Result<()> {
     let (qi_bytes, qi_len) = string_to_two_bits(&qi_decompressed);
 
     // 生成 Rust 代码
-    writeln!(&mut f, "{}", QISHUO_HEADER)?;
-    writeln!(&mut f, "pub const SHUO_BYTES: &[u8] = &{shuo_bytes:?};")?;
-    writeln!(&mut f, "pub const SHUO_LEN: usize = {shuo_len};")?;
-    writeln!(&mut f, "pub const QI_BYTES: &[u8] = &{qi_bytes:?};")?;
-    writeln!(&mut f, "pub const QI_LEN: usize = {qi_len};")?;
-    writeln!(&mut f)?;
-    writeln!(&mut f, "{}", GET_SHUO_FUNCTION)?;
-    writeln!(&mut f)?;
-    writeln!(&mut f, "{}", GET_QI_FUNCTION)?;
+    let content = format!(
+        "{}\npub const SHUO_BYTES: &[u8] = &{shuo_bytes:?};\npub const SHUO_LEN: usize = {shuo_len};\npub const QI_BYTES: &[u8] = &{qi_bytes:?};\npub const QI_LEN: usize = {qi_len};\n\n{}\n\n{}",
+        QISHUO_HEADER, GET_SHUO_FUNCTION, GET_QI_FUNCTION
+    );
+
+    let dest_path = Path::new("src")
+        .join("sxtwl")
+        .join("generated_compressed_qishuo_correction_data.rs");
+
+    // 写入文件
+    let mut f = File::create(&dest_path).unwrap();
+    writeln!(&mut f, "{}", content)?;
 
     Ok(())
 }
